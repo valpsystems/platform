@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #0A0A1A;
+  --color-foreground: #F8FAFC;
+  --color-primary: #0066FF;
+  --color-primary-dark: #0052CC;
+  --color-secondary: #00CCFF;
+  --color-accent: #7C3AED;
+  --color-card: #0D0D2B;
+  --color-border: #1A1A3E;
+  --color-muted: #6B7280;
+  --color-darker: #060612;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1A1A3E transparent;
+}
+
+body {
+  background: #0A0A1A;
+  color: #F8FAFC;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+::selection {
+  background: rgba(0, 102, 255, 0.3);
+  color: #F8FAFC;
+}
