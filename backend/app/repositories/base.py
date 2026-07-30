@@ -3,7 +3,7 @@ from __future__ import annotations
 import operator
 from collections.abc import Sequence
 from functools import reduce
-from typing import Any, TypeVar
+from typing import Any, Generic, TypeVar
 
 from sqlalchemy import Select, UnaryExpression, asc, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +13,7 @@ from app.database.base import Base
 ModelType = TypeVar("ModelType", bound=Base)
 
 
-class PaginatedResult[ModelType: Base]:
+class PaginatedResult(Generic[ModelType]):
     def __init__(
         self,
         items: Sequence[ModelType],
@@ -28,7 +28,7 @@ class PaginatedResult[ModelType: Base]:
         self.pages = (total + page_size - 1) // page_size if page_size > 0 else 0
 
 
-class BaseRepository[ModelType: Base]:
+class BaseRepository(Generic[ModelType]):
     def __init__(self, model: type[ModelType], session: AsyncSession) -> None:
         self.model = model
         self.session = session
