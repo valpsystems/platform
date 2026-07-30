@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import Depends, HTTPException, Header, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -14,9 +14,9 @@ security_scheme = HTTPBearer(auto_error=False)
 
 
 async def get_token_from_header(
-    authorization: Annotated[HTTPAuthorizationCredentials | None, Depends(security_scheme)] = None,
-    x_api_key: Annotated[str | None, Header()] = None,
-) -> str | None:
+    authorization: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security_scheme)] = None,
+    x_api_key: Annotated[Optional[str], Header()] = None,
+) -> Optional[str]:
     if authorization:
         return authorization.credentials
     if x_api_key:
@@ -25,7 +25,7 @@ async def get_token_from_header(
 
 
 async def get_current_user(
-    token: Annotated[str | None, Depends(get_token_from_header)],
+    token: Annotated[Optional[str], Depends(get_token_from_header)],
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     if not token:

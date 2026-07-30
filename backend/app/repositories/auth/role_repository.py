@@ -8,13 +8,14 @@ from sqlalchemy.orm import selectinload
 
 from app.models.auth import Role
 from app.repositories.base import BaseRepository
+from typing import Optional
 
 
 class RoleRepository(BaseRepository[Role]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(Role, session)
 
-    async def get_by_name(self, name: str) -> Role | None:
+    async def get_by_name(self, name: str) -> Optional[Role]:
         result = await self.session.execute(
             select(Role)
             .options(selectinload(Role.permissions))
@@ -22,7 +23,7 @@ class RoleRepository(BaseRepository[Role]):
         )
         return result.unique().scalar_one_or_none()
 
-    async def get_with_permissions(self, role_id: str) -> Role | None:
+    async def get_with_permissions(self, role_id: str) -> Optional[Role]:
         result = await self.session.execute(
             select(Role)
             .options(selectinload(Role.permissions))

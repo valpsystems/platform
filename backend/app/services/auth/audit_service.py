@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 from app.repositories.auth import AuditLogRepository
 
@@ -13,15 +13,15 @@ class AuditService:
         self,
         action: str,
         resource_type: str,
-        resource_id: str | None = None,
-        actor_id: str | None = None,
-        details: str | None = None,
-        ip_address: str | None = None,
-        user_agent: str | None = None,
-        request_method: str | None = None,
-        request_path: str | None = None,
-        status_code: int | None = None,
-        duration_ms: int | None = None,
+        resource_id: Optional[str] = None,
+        actor_id: Optional[str] = None,
+        details: Optional[str] = None,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
+        request_method: Optional[str] = None,
+        request_path: Optional[str] = None,
+        status_code: Optional[int] = None,
+        duration_ms: Optional[int] = None,
     ) -> dict[str, Any]:
         audit = await self.audit_log_repo.create(
             action=action,

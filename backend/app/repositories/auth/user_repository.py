@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import Optional
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +15,7 @@ class UserRepository(BaseRepository[User]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(User, session)
 
-    async def get_by_email(self, email: str) -> User | None:
+    async def get_by_email(self, email: str) -> Optional[User]:
         result = await self.session.execute(
             select(User)
             .options(selectinload(User.roles))
@@ -22,7 +23,7 @@ class UserRepository(BaseRepository[User]):
         )
         return result.unique().scalar_one_or_none()
 
-    async def get_by_username(self, username: str) -> User | None:
+    async def get_by_username(self, username: str) -> Optional[User]:
         result = await self.session.execute(
             select(User)
             .options(selectinload(User.roles))
@@ -30,7 +31,7 @@ class UserRepository(BaseRepository[User]):
         )
         return result.unique().scalar_one_or_none()
 
-    async def get_with_roles(self, user_id: str) -> User | None:
+    async def get_with_roles(self, user_id: str) -> Optional[User]:
         result = await self.session.execute(
             select(User)
             .options(selectinload(User.roles))

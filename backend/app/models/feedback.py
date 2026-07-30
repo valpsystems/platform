@@ -5,14 +5,15 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.constants.enums import FeedbackCategory
 from app.database.base import Base
+from typing import Optional
 
 
 class Feedback(Base):
     __tablename__ = "feedbacks"
 
-    name: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    email: Mapped[str | None] = mapped_column(String(320), nullable=True)
-    category: Mapped[str | None] = mapped_column(
+    name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    email: Mapped[Optional[str]] = mapped_column(String(320), nullable=True)
+    category: Mapped[Optional[str]] = mapped_column(
         String(20),
         default=FeedbackCategory.GENERAL,
         nullable=True,

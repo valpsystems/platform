@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from sqlalchemy import Boolean, DateTime, Integer, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -21,16 +21,16 @@ class Base(DeclarativeBase):
         default=lambda: datetime.now(timezone.utc),
         nullable=False)
 
-    updated_at: Mapped[datetime | None] = mapped_column(
+    updated_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
         onupdate=lambda: datetime.now(timezone.utc),
         nullable=True)
 
-    created_by: Mapped[str | None] = mapped_column(
+    created_by: Mapped[Optional[str]] = mapped_column(
         String(36),
         nullable=True)
 
-    updated_by: Mapped[str | None] = mapped_column(
+    updated_by: Mapped[Optional[str]] = mapped_column(
         String(36),
         nullable=True)
 
@@ -44,7 +44,7 @@ class Base(DeclarativeBase):
         default=False,
         nullable=False)
 
-    deleted_at: Mapped[datetime | None] = mapped_column(
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
         nullable=True)
 

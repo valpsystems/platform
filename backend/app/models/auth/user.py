@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import Boolean, DateTime, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -25,27 +25,27 @@ class User(Base):
         String(100), unique=True, index=True, nullable=False
     )
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    first_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    last_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    bio: Mapped[str | None] = mapped_column(Text, nullable=True)
-    department: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    job_title: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    first_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    last_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    bio: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    department: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    job_title: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
     is_email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_locked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    locked_until: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     login_attempts: Mapped[int] = mapped_column(
         Integer, default=0, nullable=False
     )
-    last_login_at: Mapped[datetime | None] = mapped_column(
+    last_login_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    last_login_ip: Mapped[str | None] = mapped_column(String(45), nullable=True)
+    last_login_ip: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
 
-    password_changed_at: Mapped[datetime | None] = mapped_column(
+    password_changed_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
     require_password_change: Mapped[bool] = mapped_column(
@@ -55,7 +55,7 @@ class User(Base):
     two_factor_enabled: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
     )
-    two_factor_secret: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    two_factor_secret: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     roles: Mapped[list[Role]] = relationship(
         "Role",
@@ -128,5 +128,4 @@ class User(Base):
         self.login_attempts = 0
         self.is_locked = False
         self.locked_until = None
-
 

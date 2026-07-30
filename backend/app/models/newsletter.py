@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.constants.enums import SubscriptionStatus
 from app.database.base import Base
+from typing import Optional
 
 
 class Newsletter(Base):
@@ -17,7 +18,7 @@ class Newsletter(Base):
         unique=True,
         nullable=False,
         index=True)
-    name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     is_subscribed: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     status: Mapped[str] = mapped_column(
         String(20),
@@ -27,7 +28,7 @@ class Newsletter(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False)
-    unsubscribed_at: Mapped[datetime | None] = mapped_column(
+    unsubscribed_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
         nullable=True)
 

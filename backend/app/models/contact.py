@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.constants.enums import ContactStatus
 from app.database.base import Base
+from typing import Optional
 
 
 class Contact(Base):
@@ -12,9 +13,9 @@ class Contact(Base):
 
     name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
     email: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
-    phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    company: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    subject: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    company: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    subject: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[str] = mapped_column(
         String(20),
@@ -22,7 +23,7 @@ class Contact(Base):
         nullable=False,
         index=True,
     )
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     __table_args__ = (
         Index("idx_contacts_status_created", "status", "created_at"),

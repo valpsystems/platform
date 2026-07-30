@@ -8,13 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.auth import RefreshToken
 from app.repositories.base import BaseRepository
+from typing import Optional
 
 
 class RefreshTokenRepository(BaseRepository[RefreshToken]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(RefreshToken, session)
 
-    async def get_by_token_hash(self, token_hash: str) -> RefreshToken | None:
+    async def get_by_token_hash(self, token_hash: str) -> Optional[RefreshToken]:
         result = await self.session.execute(
             select(RefreshToken).where(
                 RefreshToken.token_hash == token_hash,

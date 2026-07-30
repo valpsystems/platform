@@ -3,7 +3,7 @@ from __future__ import annotations
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Any
+from typing import Any, Optional
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -24,7 +24,7 @@ class EmailService:
         to_email: str,
         subject: str,
         template_name: str,
-        context: dict[str, Any] | None = None,
+        context: Optional[dict[str, Any]] = None,
     ) -> bool:
         if not settings.SMTP_HOST:
             app_logger.warning("SMTP not configured, skipping email send")
@@ -94,7 +94,7 @@ class EmailService:
         email: str,
         position: str,
         phone: str,
-        experience_years: int | None,
+        experience_years: Optional[int],
         cover_letter: str,
         linkedin_url: str,
         portfolio_url: str,

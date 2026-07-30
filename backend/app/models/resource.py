@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.constants.enums import ContentStatus
 from app.database.base import Base
+from typing import Optional
 
 
 class Resource(Base):
@@ -14,16 +15,16 @@ class Resource(Base):
 
     title: Mapped[str] = mapped_column(String(300), nullable=False)
     slug: Mapped[str] = mapped_column(String(300), nullable=False)
-    category: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
-    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
-    content: Mapped[str | None] = mapped_column(Text, nullable=True)
-    author: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    published_date: Mapped[datetime | None] = mapped_column(
+    category: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, index=True)
+    summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    author: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    published_date: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
     )
-    cover_image: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    tags: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    cover_image: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    tags: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     status: Mapped[str] = mapped_column(
         String(20),
         default=ContentStatus.DRAFT,

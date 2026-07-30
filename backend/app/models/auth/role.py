@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Boolean, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -18,7 +18,7 @@ class Role(Base):
     name: Mapped[str] = mapped_column(
         String(100), unique=True, index=True, nullable=False
     )
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     is_system_role: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
     )
@@ -36,5 +36,4 @@ class Role(Base):
         back_populates="roles",
         lazy="selectin",
     )
-
 

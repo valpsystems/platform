@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -16,28 +16,28 @@ if TYPE_CHECKING:
 class AuditLog(Base):
     __tablename__ = "audit_logs"
 
-    actor_id: Mapped[str | None] = mapped_column(
+    actor_id: Mapped[Optional[str]] = mapped_column(
         String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     action: Mapped[str] = mapped_column(String(100), nullable=False)
     resource_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    resource_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
-    details: Mapped[str | None] = mapped_column(Text, nullable=True)
-    ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
-    user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    request_method: Mapped[str | None] = mapped_column(String(10), nullable=True)
-    request_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    status_code: Mapped[int | None] = mapped_column(
+    resource_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
+    details: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    ip_address: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
+    user_agent: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    request_method: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    request_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    status_code: Mapped[Optional[int]] = mapped_column(
         Integer, nullable=True
     )
-    duration_ms: Mapped[int | None] = mapped_column(
+    duration_ms: Mapped[Optional[int]] = mapped_column(
         Integer, nullable=True
     )
     performed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
     )
 
-    actor: Mapped[User | None] = relationship(
+    actor: Mapped[Optional[User]] = relationship(
         "User", back_populates="audit_logs", foreign_keys=[actor_id]
     )
 

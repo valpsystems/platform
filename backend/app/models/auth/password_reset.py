@@ -6,6 +6,7 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
+from typing import Optional
 
 
 class PasswordReset(Base):
@@ -22,14 +23,14 @@ class PasswordReset(Base):
         DateTime(timezone=True), nullable=False
     )
     is_used: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    used_at: Mapped[datetime | None] = mapped_column(
+    used_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    reset_at: Mapped[datetime | None] = mapped_column(
+    reset_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
-    user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    ip_address: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
+    user_agent: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     @property
     def is_expired(self) -> bool:

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.constants.enums import ApplicationStatus
 from app.database.base import Base
+from typing import Optional
 
 
 class CareerApplication(Base):
@@ -12,13 +13,13 @@ class CareerApplication(Base):
 
     name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
     email: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
-    phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     position: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
-    experience_years: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    cover_letter: Mapped[str | None] = mapped_column(Text, nullable=True)
-    resume_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    linkedin_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    portfolio_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    experience_years: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    cover_letter: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    resume_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    linkedin_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    portfolio_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     status: Mapped[str] = mapped_column(
         String(20),
         default=ApplicationStatus.PENDING,

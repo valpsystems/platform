@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 
 from app.core.config import settings
+from typing import Optional
 
 
 class JWTService:
@@ -17,8 +18,8 @@ class JWTService:
     def create_access_token(
         user_id: str,
         email: str,
-        extra_claims: dict | None = None,
-        expires_delta: timedelta | None = None) -> str:
+        extra_claims: Optional[dict] = None,
+        expires_delta: Optional[timedelta] = None) -> str:
         expires_in = expires_delta or timedelta(
             minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
         )
@@ -42,7 +43,7 @@ class JWTService:
     def create_refresh_token(
         user_id: str,
         email: str,
-        expires_delta: timedelta | None = None) -> str:
+        expires_delta: Optional[timedelta] = None) -> str:
         expires_in = expires_delta or timedelta(
             days=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS
         )
@@ -61,7 +62,7 @@ class JWTService:
             algorithm=settings.JWT_ALGORITHM)
 
     @staticmethod
-    def decode_token(token: str) -> dict | None:
+    def decode_token(token: str) -> Optional[dict]:
         try:
             payload = jwt.decode(
                 token,
@@ -87,14 +88,14 @@ class JWTService:
         return datetime.now(timezone.utc) > datetime.fromtimestamp(exp, tz=timezone.utc)
 
     @staticmethod
-    def get_token_type(token: str) -> str | None:
+    def get_token_type(token: str) -> Optional[str]:
         payload = JWTService.decode_token(token)
         if payload is None:
             return None
         return payload.get("type")
 
     @staticmethod
-    def get_user_id_from_token(token: str) -> str | None:
+    def get_user_id_from_token(token: str) -> Optional[str]:
         payload = JWTService.decode_token(token)
         if payload is None:
             return None

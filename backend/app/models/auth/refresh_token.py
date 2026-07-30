@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -25,12 +25,12 @@ class RefreshToken(Base):
         DateTime(timezone=True), nullable=False
     )
     is_revoked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    revoked_at: Mapped[datetime | None] = mapped_column(
+    revoked_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    device_info: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
-    user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    device_info: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    ip_address: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
+    user_agent: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     user: Mapped[User] = relationship("User", back_populates="refresh_tokens")
 

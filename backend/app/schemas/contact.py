@@ -5,21 +5,22 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.constants.enums import ContactStatus
+from typing import Optional
 
 
 class ContactRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
     email: EmailStr
-    company: str | None = Field(None, max_length=200)
-    phone: str | None = Field(None, max_length=50)
-    subject: str | None = Field(None, max_length=500)
+    company: Optional[str] = Field(None, max_length=200)
+    phone: Optional[str] = Field(None, max_length=50)
+    subject: Optional[str] = Field(None, max_length=500)
     message: str = Field(..., min_length=10, max_length=5000)
 
 
 class ContactResponse(BaseModel):
     success: bool = True
     message: str = "Contact request received successfully"
-    data: dict | None = None
+    data: Optional[dict] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -29,12 +30,12 @@ class ContactDBResponse(BaseModel):
     id: str
     name: str
     email: str
-    company: str | None = None
-    phone: str | None = None
-    subject: str | None = None
+    company: Optional[str] = None
+    phone: Optional[str] = None
+    subject: Optional[str] = None
     message: str
     status: str = ContactStatus.PENDING
-    notes: str | None = None
+    notes: Optional[str] = None
     created_at: datetime
-    updated_at: datetime | None = None
+    updated_at: Optional[datetime] = None
     is_active: bool = True

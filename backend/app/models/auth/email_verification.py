@@ -6,6 +6,7 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
+from typing import Optional
 
 
 class EmailVerification(Base):
@@ -22,7 +23,7 @@ class EmailVerification(Base):
         DateTime(timezone=True), nullable=False
     )
     is_used: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    used_at: Mapped[datetime | None] = mapped_column(
+    used_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import secrets
+from typing import Optional
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
@@ -44,7 +45,7 @@ class AuthService:
         self.login_history_repo = login_history_repo
         self.email_service = EmailService()
 
-    async def register(self, request: RegisterRequest, ip_address: str | None = None, user_agent: str | None = None) -> dict:
+    async def register(self, request: RegisterRequest, ip_address: Optional[str] = None, user_agent: Optional[str] = None) -> dict:
         existing_email = await self.user_repo.email_exists(request.email)
         if existing_email:
             raise HTTPException(
@@ -104,8 +105,8 @@ class AuthService:
     async def login(
         self,
         request: LoginRequest,
-        ip_address: str | None = None,
-        user_agent: str | None = None) -> dict:
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None) -> dict:
         user = await self.user_repo.get_by_email(request.email)
         if not user:
             raise HTTPException(
@@ -211,7 +212,7 @@ class AuthService:
             "user": user_data,
         }
 
-    async def logout(self, user_id: str, refresh_token: str | None = None) -> dict:
+    async def logout(self, user_id: str, refresh_token: Optional[str] = None) -> dict:
         if refresh_token:
             token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
             stored_token = await self.refresh_token_repo.get_by_token_hash(token_hash)
@@ -233,8 +234,8 @@ class AuthService:
     async def refresh_token(
         self,
         refresh_token: str,
-        ip_address: str | None = None,
-        user_agent: str | None = None) -> dict:
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None) -> dict:
         payload = JWTService.decode_token(refresh_token)
         if not payload or payload.get("type") != "refresh":
             raise HTTPException(
@@ -395,8 +396,8 @@ class AuthService:
     async def forgot_password(
         self,
         request: ForgotPasswordRequest,
-        ip_address: str | None = None,
-        user_agent: str | None = None) -> dict:
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None) -> dict:
         user = await self.user_repo.get_by_email(request.email)
 
         if not user:
@@ -442,8 +443,8 @@ class AuthService:
     async def reset_password(
         self,
         request: ResetPasswordRequest,
-        ip_address: str | None = None,
-        user_agent: str | None = None) -> dict:
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None) -> dict:
         from app.models.auth import PasswordReset as PasswordResetModel
         from sqlalchemy import select
 
