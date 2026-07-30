@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from collections.abc import Sequence
 
 from sqlalchemy import func, select
@@ -19,8 +19,7 @@ class AuditLogRepository(BaseRepository[AuditLog]):
             select(AuditLog)
             .where(
                 AuditLog.actor_id == actor_id,
-                AuditLog.is_deleted.is_(False),
-            )
+                AuditLog.is_deleted.is_(False))
             .order_by(AuditLog.performed_at.desc())
             .limit(limit)
         )
@@ -34,8 +33,7 @@ class AuditLogRepository(BaseRepository[AuditLog]):
             .where(
                 AuditLog.resource_type == resource_type,
                 AuditLog.resource_id == resource_id,
-                AuditLog.is_deleted.is_(False),
-            )
+                AuditLog.is_deleted.is_(False))
             .order_by(AuditLog.performed_at.desc())
             .limit(limit)
         )
@@ -46,17 +44,16 @@ class AuditLogRepository(BaseRepository[AuditLog]):
             select(AuditLog)
             .where(
                 AuditLog.action == action,
-                AuditLog.is_deleted.is_(False),
-            )
+                AuditLog.is_deleted.is_(False))
             .order_by(AuditLog.performed_at.desc())
             .limit(limit)
         )
         return result.scalars().all()
 
     async def cleanup_old(self, days: int = 90) -> int:
-        cutoff = datetime.now(UTC).replace(tzinfo=None)
+        cutoff = datetime.now(timezone.utc).replace(tzinfo=None)
         cutoff = cutoff.replace(hour=0, minute=0, second=0, microsecond=0)
-        from datetime import timedelta
+        from datetime import timedelta, timezone
         cutoff = cutoff - timedelta(days=days)
 
         result = await self.session.execute(

@@ -18,8 +18,7 @@ class LoginHistoryRepository(BaseRepository[LoginHistory]):
             select(LoginHistory)
             .where(
                 LoginHistory.user_id == user_id,
-                LoginHistory.is_deleted.is_(False),
-            )
+                LoginHistory.is_deleted.is_(False))
             .order_by(LoginHistory.login_at.desc())
             .limit(limit)
         )
@@ -28,17 +27,16 @@ class LoginHistoryRepository(BaseRepository[LoginHistory]):
     async def get_recent_failures(
         self, user_id: str, minutes: int = 15
     ) -> Sequence[LoginHistory]:
-        from datetime import UTC, datetime, timedelta
+        from datetime import datetime, timedelta, timezone
 
-        cutoff = datetime.now(UTC) - timedelta(minutes=minutes)
+        cutoff = datetime.now(timezone.utc) - timedelta(minutes=minutes)
         result = await self.session.execute(
             select(LoginHistory)
             .where(
                 LoginHistory.user_id == user_id,
                 LoginHistory.is_successful.is_(False),
                 LoginHistory.login_at >= cutoff,
-                LoginHistory.is_deleted.is_(False),
-            )
+                LoginHistory.is_deleted.is_(False))
             .order_by(LoginHistory.login_at.desc())
         )
         return result.scalars().all()

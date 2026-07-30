@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import secrets
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
 
@@ -18,12 +18,11 @@ class JWTService:
         user_id: str,
         email: str,
         extra_claims: dict | None = None,
-        expires_delta: timedelta | None = None,
-    ) -> str:
+        expires_delta: timedelta | None = None) -> str:
         expires_in = expires_delta or timedelta(
             minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
         )
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         payload = {
             "jti": JWTService._generate_jti(),
             "sub": user_id,
@@ -37,19 +36,17 @@ class JWTService:
         return jwt.encode(
             payload,
             settings.JWT_SECRET_KEY,
-            algorithm=settings.JWT_ALGORITHM,
-        )
+            algorithm=settings.JWT_ALGORITHM)
 
     @staticmethod
     def create_refresh_token(
         user_id: str,
         email: str,
-        expires_delta: timedelta | None = None,
-    ) -> str:
+        expires_delta: timedelta | None = None) -> str:
         expires_in = expires_delta or timedelta(
             days=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS
         )
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         payload = {
             "jti": JWTService._generate_jti(),
             "sub": user_id,
@@ -61,8 +58,7 @@ class JWTService:
         return jwt.encode(
             payload,
             settings.JWT_SECRET_KEY,
-            algorithm=settings.JWT_ALGORITHM,
-        )
+            algorithm=settings.JWT_ALGORITHM)
 
     @staticmethod
     def decode_token(token: str) -> dict | None:
@@ -70,8 +66,7 @@ class JWTService:
             payload = jwt.decode(
                 token,
                 settings.JWT_SECRET_KEY,
-                algorithms=[settings.JWT_ALGORITHM],
-            )
+                algorithms=[settings.JWT_ALGORITHM])
             return payload
         except JWTError:
             return None
@@ -89,7 +84,7 @@ class JWTService:
         if payload is None:
             return True
         exp = payload.get("exp", 0)
-        return datetime.now(UTC) > datetime.fromtimestamp(exp, tz=UTC)
+        return datetime.now(timezone.utc) > datetime.fromtimestamp(exp, tz=timezone.utc)
 
     @staticmethod
     def get_token_type(token: str) -> str | None:

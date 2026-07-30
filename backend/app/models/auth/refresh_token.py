@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
@@ -38,8 +38,8 @@ class RefreshToken(Base):
     def is_expired(self) -> bool:
         expires = self.expires_at
         if expires.tzinfo is None:
-            expires = expires.replace(tzinfo=UTC)
-        return datetime.now(UTC) > expires
+            expires = expires.replace(tzinfo=timezone.utc)
+        return datetime.now(timezone.utc) > expires
 
     @property
     def is_valid(self) -> bool:

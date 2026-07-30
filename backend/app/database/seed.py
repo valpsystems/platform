@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -198,7 +198,7 @@ RESOURCES = [
             "migration strategy for enterprise organizations."
         ),
         "author": "VALP SYSTEMS Engineering Team",
-        "published_date": datetime(2025, 11, 15, tzinfo=UTC),
+        "published_date": datetime(2025, 11, 15, tzinfo=timezone.utc),
         "status": ContentStatus.PUBLISHED,
         "tags": "cloud,migration,strategy,enterprise",
     },
@@ -211,7 +211,7 @@ RESOURCES = [
             "in production environments, from security to monitoring."
         ),
         "author": "VALP SYSTEMS Engineering Team",
-        "published_date": datetime(2025, 10, 20, tzinfo=UTC),
+        "published_date": datetime(2025, 10, 20, tzinfo=timezone.utc),
         "status": ContentStatus.PUBLISHED,
         "tags": "kubernetes,containers,production,devops",
     },
@@ -224,7 +224,7 @@ RESOURCES = [
             "seamlessly into your CI/CD pipeline without slowing down development."
         ),
         "author": "VALP SYSTEMS Security Team",
-        "published_date": datetime(2025, 9, 5, tzinfo=UTC),
+        "published_date": datetime(2025, 9, 5, tzinfo=timezone.utc),
         "status": ContentStatus.PUBLISHED,
         "tags": "devsecops,security,cicd,automation",
     },
@@ -237,7 +237,7 @@ RESOURCES = [
             "teams by providing self-service capabilities and standardized workflows."
         ),
         "author": "VALP SYSTEMS Engineering Team",
-        "published_date": datetime(2025, 8, 12, tzinfo=UTC),
+        "published_date": datetime(2025, 8, 12, tzinfo=timezone.utc),
         "status": ContentStatus.PUBLISHED,
         "tags": "platform-engineering,developer-experience,idp",
     },
@@ -250,7 +250,7 @@ RESOURCES = [
             "experimental prototypes to production-ready systems."
         ),
         "author": "VALP SYSTEMS AI Team",
-        "published_date": datetime(2025, 7, 22, tzinfo=UTC),
+        "published_date": datetime(2025, 7, 22, tzinfo=timezone.utc),
         "status": ContentStatus.PUBLISHED,
         "tags": "ai,ml,machine-learning,production,case-study",
     },

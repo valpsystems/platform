@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import Boolean, DateTime, Integer, String, Text, func
@@ -61,23 +61,19 @@ class User(Base):
         "Role",
         secondary="user_roles",
         back_populates="users",
-        lazy="selectin",
-    )
+        lazy="selectin")
 
     refresh_tokens: Mapped[list[RefreshToken]] = relationship(
         "RefreshToken", back_populates="user", lazy="selectin",
-        cascade="all, delete-orphan",
-    )
+        cascade="all, delete-orphan")
 
     login_history: Mapped[list[LoginHistory]] = relationship(
         "LoginHistory", back_populates="user", lazy="selectin",
-        cascade="all, delete-orphan",
-    )
+        cascade="all, delete-orphan")
 
     audit_logs: Mapped[list[AuditLog]] = relationship(
         "AuditLog", back_populates="actor", lazy="selectin",
-        foreign_keys="AuditLog.actor_id",
-    )
+        foreign_keys="AuditLog.actor_id")
 
     def dict(self) -> dict[str, Any]:
         return {

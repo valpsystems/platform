@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from app.core.config import settings
 from app.utils.response import APIResponse
@@ -13,7 +13,6 @@ class HealthController:
                 "status": "healthy",
                 "version": settings.APP_VERSION,
                 "environment": settings.APP_ENV,
-                "timestamp": datetime.now(UTC).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
-            message="Service is healthy",
-        )
+            message="Service is healthy")

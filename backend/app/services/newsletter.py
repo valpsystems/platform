@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from app.constants.enums import SubscriptionStatus
 from app.emails import EmailService
@@ -18,8 +18,7 @@ class NewsletterService:
         app_logger.info(
             "Processing newsletter subscription",
             email=request.email,
-            name=request.name,
-        )
+            name=request.name)
 
         existing = await self.repository.first(email=request.email)
         if existing:
@@ -28,8 +27,7 @@ class NewsletterService:
                     existing.id,
                     is_subscribed=True,
                     status=SubscriptionStatus.ACTIVE,
-                    unsubscribed_at=None,
-                )
+                    unsubscribed_at=None)
             subscriber = existing
         else:
             subscriber = await self.repository.create(
@@ -37,13 +35,11 @@ class NewsletterService:
                 name=request.name,
                 is_subscribed=True,
                 status=SubscriptionStatus.ACTIVE,
-                subscribed_at=datetime.now(UTC),
-            )
+                subscribed_at=datetime.now(timezone.utc))
 
         await self.email_service.send_newsletter_confirmation(
             email=request.email,
-            name=request.name or "Subscriber",
-        )
+            name=request.name or "Subscriber")
 
         return {
             "id": subscriber.id,
