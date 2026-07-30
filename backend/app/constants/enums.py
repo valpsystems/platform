@@ -1,6 +1,13 @@
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
+
+
+class StrEnum(str, Enum):
+    """Python 3.9-compatible replacement for enum.StrEnum (3.11+)."""
+
+    def __str__(self) -> str:
+        return self.value
 
 
 class ContactStatus(StrEnum):
