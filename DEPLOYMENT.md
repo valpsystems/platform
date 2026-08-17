@@ -123,7 +123,7 @@ PGPASSWORD='<DB_PASSWORD>' psql -h <DB_PRIVATE_IP> -U appuser -d appdb -c "SELEC
 
 ## 4. App Server — System Prep
 
-> Repo already cloned at `/opt/valpsystems`. Commands run on **App Server** (`ssh app-server`).
+> Repo already cloned at `/opt/platform`. Commands run on **App Server** (`ssh app-server`).
 
 ```bash
 # Update & install required packages
@@ -132,13 +132,13 @@ sudo dnf install -y python3 python3-pip python3-venv git nginx
 node --version   # 18+, else: sudo dnf install -y nodejs npm
 
 # Verify repo location
-ls /opt/valpsystems
+ls /opt/platform
 ```
 
 ## 5. Backend — Deploy (FastAPI)
 
 ```bash
-cd /opt/valpsystems/backend
+cd /opt/platform/backend
 
 # 1. Virtual environment
 python3 -m venv .venv
@@ -192,7 +192,7 @@ RATE_LIMIT_ENABLED=false
 
 ```bash
 source .venv/bin/activate
-cd /opt/valpsystems/backend
+cd /opt/platform/backend
 alembic upgrade head
 
 # Verify 19 tables
@@ -237,10 +237,10 @@ Wants=postgresql.service
 Type=simple
 User=ec2-user
 Group=ec2-user
-WorkingDirectory=/opt/valpsystems/backend
-Environment=PATH=/opt/valpsystems/backend/.venv/bin:/usr/bin:/usr/local/bin
-EnvironmentFile=/opt/valpsystems/backend/.env
-ExecStart=/opt/valpsystems/backend/.venv/bin/uvicorn app.main:app \
+WorkingDirectory=/opt/platform/backend
+Environment=PATH=/opt/platform/backend/.venv/bin:/usr/bin:/usr/local/bin
+EnvironmentFile=/opt/platform/backend/.env
+ExecStart=/opt/platform/backend/.venv/bin/uvicorn app.main:app \
   --host 127.0.0.1 --port 8080 --workers 4 --log-level info
 Restart=always
 RestartSec=5
@@ -258,7 +258,7 @@ sudo journalctl -u valp-backend -f
 ## 6. Frontend — Deploy (Next.js)
 
 ```bash
-cd /opt/valpsystems/frontend
+cd /opt/platform/frontend
 npm install
 npm run build
 
@@ -362,7 +362,7 @@ pm2 status
 
 ```bash
 # Code update (app server)
-cd /opt/valpsystems
+cd /opt/platform
 git pull origin main
 cd backend && source .venv/bin/activate && pip install -r requirements.txt && alembic upgrade head && sudo systemctl restart valp-backend
 cd ../frontend && npm install && npm run build && pm2 restart valp-frontend
@@ -376,15 +376,15 @@ sudo tail -f /var/log/nginx/valp-access.log   # proxy
 ### DB backup (cron on DB server)
 
 ```bash
-sudo tee /opt/valpsystems/scripts/backup.sh << 'SCRIPT'
+sudo tee /opt/platform/scripts/backup.sh << 'SCRIPT'
 #!/bin/bash
-BACKUP_DIR="/opt/valpsystems/backups"
+BACKUP_DIR="/opt/platform/backups"
 mkdir -p $BACKUP_DIR
 PGPASSWORD='<DB_PASSWORD>' pg_dump -h 127.0.0.1 -U appuser -d appdb > "$BACKUP_DIR/backup_$(date +%Y%m%d_%H%M%S).sql"
 find $BACKUP_DIR -name "*.sql" -mtime +7 -delete
 SCRIPT
-chmod +x /opt/valpsystems/scripts/backup.sh
-sudo crontab -e        # 0 3 * * * /opt/valpsystems/scripts/backup.sh
+chmod +x /opt/platform/scripts/backup.sh
+sudo crontab -e        # 0 3 * * * /opt/platform/scripts/backup.sh
 ```
 
 ## 10. Troubleshooting
@@ -396,4 +396,4 @@ sudo crontab -e        # 0 3 * * * /opt/valpsystems/scripts/backup.sh
 | DB auth failed | User/password in `.env` vs DB; md5 line in pg_hba.conf |
 | Frontend blank page | CORS_ORIGINS / TRUSTED_HOSTS in backend `.env` |
 | Auth broken after redeploy | Same JWT_SECRET_KEY across restarts (keep in `.env`) |
-| Log permission errors | `sudo chown -R ec2-user:ec2-user /opt/valpsystems/backend/app/logs` |
+| Log permission errors | `sudo chown -R ec2-user:ec2-user /opt/platform/backend/app/logs` |
