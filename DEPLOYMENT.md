@@ -6,6 +6,17 @@ Single-source deployment reference for the VALP SYSTEMS stack
 > **Current status:** Repo already cloned on the App Server. Remaining work: DB server
 > setup/verification, backend venv + systemd, frontend build + PM2, proxy NGINX config.
 
+> **NOTE — Public IP (EIP):** AWS EIP was discarded for now (avoids hourly cost while
+> not in use). The proxy instance uses an **auto-assigned public IP**, which **changes
+> on every stop/start**. Once deployment is complete, an EIP will be allocated and
+> associated later if a static IP is needed.
+>
+> Until then, every time the proxy IP changes, update:
+> 1. Local SSH config (`~/.ssh/config` → proxy-server `HostName`)
+> 2. `/opt/platform/backend/.env` → `APP_URL`, `CORS_ORIGINS`, `TRUSTED_HOSTS`
+>    (replace `<NEW_PUBLIC_IP>`), then: `sudo systemctl restart valp-backend`
+> 3. All `174.129.16.36` references in this document (placeholders from the old EIP)
+
 ---
 
 ## 1. Architecture
@@ -187,6 +198,11 @@ RATE_LIMIT_ENABLED=false
 
 > `APP_SECRET_KEY` and `JWT_SECRET_KEY` **must differ**. Note: `/docs` is enabled
 > only in development — with `APP_ENV=production` Swagger is disabled (by design).
+>
+> **Bind address:** the backend must run with `--host 0.0.0.0` — nginx on the proxy
+> reaches it via the VPC IP, and `127.0.0.1` returns 502 (fixed 2026-08-21). Access is
+> restricted by Security Groups: sg-app allows 8080 + 3000 from sg-proxy only.
+> See `TROUBLESHOOTING.md` for symptom→cause→fix tables.
 
 ### 5.2 Migrations
 
@@ -241,7 +257,7 @@ WorkingDirectory=/opt/platform/backend
 Environment=PATH=/opt/platform/backend/.venv/bin:/usr/bin:/usr/local/bin
 EnvironmentFile=/opt/platform/backend/.env
 ExecStart=/opt/platform/backend/.venv/bin/uvicorn app.main:app \
-  --host 127.0.0.1 --port 8080 --workers 4 --log-level info
+  --host 0.0.0.0 --port 8080 --workers 4 --log-level info
 Restart=always
 RestartSec=5
 
