@@ -25,6 +25,8 @@ the frontend **and** when we move to containerized applications later.
 | `{"detail":"Not Found"}` | Reached FastAPI but wrong path (e.g., `/health` instead of `/api/v1/health`) | Fix nginx `proxy_pass` URI rewriting |
 | `405 Method Not Allowed` on `/` | Everything routed to an API GET-only endpoint — nginx routing broken | Restore correct `location` blocks (`curl -I` sends HEAD; test with plain `curl`) |
 | `conflicting server name "_"` warning | Duplicate `server_name _` on :80 — on AL2023 it's the inline default block **inside `nginx.conf`**, not `conf.d/default.conf` | Comment out the default `server {}` in `/etc/nginx/nginx.conf` |
+| `ENOSPC` / `Invalid Version` during npm install despite free disk | `/tmp` on AL2023 is a **tmpfs (RAM-backed, ~450M)** — caches there corrupt/fill instantly | Use default cache (`~/.npm`): plain `npm install`, never `--cache /tmp/...`; `rm -rf node_modules` and retry |
+| `504 Gateway Time-out` (not 502) | Upstream packets silently dropped = missing Security Group rule | e.g., frontend needed TCP 3000 from proxy subnet in `valp-prv-sg`; 502=refused/down, 504=dropped/blocked |
 | `No space left on device` during dnf/pip/npm | Small EBS volume fills up | `df -h /` → clean caches → grow EBS (`growpart` + `xfs_growfs`) |
 
 ## 3. Public IP Change Checklist (auto-assigned IP changes every stop/start)

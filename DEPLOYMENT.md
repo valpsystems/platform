@@ -17,6 +17,10 @@ Single-source deployment reference for the VALP SYSTEMS stack
 >    (replace `<NEW_PUBLIC_IP>`), then: `sudo systemctl restart valp-backend`
 > 3. All `174.129.16.36` references in this document (placeholders from the old EIP)
 
+> **Actual AWS resource names** (differ from generic names used below):
+> Proxy SG = `vlap-public-sg` · App/DB SG = `valp-prv-sg` (allows 22, 8080, 3000
+> from `10.0.1.0/24`) · DB SG = `valp-db-sg`. Current proxy public IP: `23.20.14.94`.
+
 ---
 
 ## 1. Architecture
