@@ -42,12 +42,12 @@ const footerLinks = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-darker">
+    <footer className="border-t border-white/10 bg-darker">
       <Container className="py-16">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2">
-            <Logo showText />
-            <p className="mt-4 text-sm text-muted max-w-xs leading-relaxed">
+            <Logo showText variant="light" />
+            <p className="mt-4 text-sm text-slate-300 max-w-xs leading-relaxed">
               {brand.description}
             </p>
             <div className="mt-6 flex gap-4">
@@ -55,7 +55,7 @@ export function Footer() {
                 href={brand.social.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted hover:text-primary transition-colors"
+                className="text-slate-400 hover:text-secondary transition-colors"
                 aria-label="LinkedIn"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@ export function Footer() {
                 href={brand.social.twitter}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted hover:text-primary transition-colors"
+                className="text-slate-400 hover:text-secondary transition-colors"
                 aria-label="Twitter"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -77,7 +77,7 @@ export function Footer() {
                 href={brand.social.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted hover:text-primary transition-colors"
+                className="text-slate-400 hover:text-secondary transition-colors"
                 aria-label="GitHub"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -89,13 +89,13 @@ export function Footer() {
 
           {footerLinks.map((group) => (
             <div key={group.title}>
-              <h3 className="text-sm font-semibold text-foreground mb-4">{group.title}</h3>
+              <h3 className="text-sm font-semibold text-white mb-4">{group.title}</h3>
               <ul className="space-y-3">
                 {group.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted hover:text-primary transition-colors"
+                      className="text-sm text-slate-400 hover:text-secondary transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -106,15 +106,15 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted">
+        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-slate-400">
             &copy; {new Date().getFullYear()} {brand.name}. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <Link href="/privacy-policy" className="text-sm text-muted hover:text-primary transition-colors">
+            <Link href="/privacy-policy" className="text-sm text-slate-400 hover:text-secondary transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms-and-conditions" className="text-sm text-muted hover:text-primary transition-colors">
+            <Link href="/terms-and-conditions" className="text-sm text-slate-400 hover:text-secondary transition-colors">
               Terms & Conditions
             </Link>
           </div>

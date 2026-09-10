@@ -5,25 +5,40 @@ import { brand } from "@/config/brand"
 
 interface LogoProps {
   className?: string
-  width?: number
-  height?: number
   showText?: boolean
+  /** Use on dark backgrounds (e.g., footer) */
+  variant?: "dark" | "light"
 }
 
-export function Logo({ className, width, height, showText = false }: LogoProps) {
+export function Logo({ className, showText = false, variant = "dark" }: LogoProps) {
   return (
-    <Link href="/" className={cn("inline-flex items-center gap-3", className)}>
+    <Link href="/" className={cn("inline-flex items-center gap-2.5", className)} aria-label={brand.logo.alt}>
       <Image
         src={brand.logo.path}
         alt={brand.logo.alt}
-        width={width ?? brand.logo.width}
-        height={height ?? brand.logo.height}
+        width={brand.logo.width}
+        height={brand.logo.height}
         priority
-        className="object-contain"
+        className="h-10 w-auto object-contain"
       />
       {showText && (
-        <span className="text-xl font-bold tracking-tight text-foreground">
-          {brand.name}
+        <span className="flex flex-col leading-none">
+          <span
+            className={cn(
+              "text-lg font-extrabold tracking-tight",
+              variant === "light" ? "text-white" : "text-foreground"
+            )}
+          >
+            VALP
+          </span>
+          <span
+            className={cn(
+              "mt-0.5 text-[10px] font-semibold uppercase tracking-[0.35em]",
+              variant === "light" ? "text-slate-300" : "text-muted"
+            )}
+          >
+            Systems
+          </span>
         </span>
       )}
     </Link>

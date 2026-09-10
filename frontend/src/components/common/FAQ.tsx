@@ -23,7 +23,7 @@ export function FAQ({ items, className }: FAQProps) {
         >
           <button
             onClick={() => setOpenIndex(openIndex === index ? null : index)}
-            className="w-full flex items-center justify-between p-5 text-left text-foreground font-medium hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-between p-5 text-left text-foreground font-medium hover:bg-primary/5 transition-colors"
             aria-expanded={openIndex === index}
           >
             {item.question}
