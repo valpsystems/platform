@@ -14,6 +14,16 @@ your own workflow files as you practice.
 > composite actions, reusable workflows, self-hosted runners, OIDC authentication,
 > and deployment gates.
 
+> **How to practice (THE 6-STEP LOOP):** Lessons 4-10 each end with a
+> **PRACTICE** section. Do them in order. For every lesson repeat this loop:
+> 1. READ the workflow + Key Concepts
+> 2. CREATE the file (exact path given in the PRACTICE section)
+> 3. COMMIT & PUSH it to your `Feature1` branch
+> 4. WATCH it run in the Actions tab
+> 5. VERIFY each checkmark bullet (this is the whole point)
+> 6. BREAK something, push, see it fail, then FIX it
+> Don't skip to the next lesson until you've ticked every box.
+
 ---
 
 ## Table of Contents
@@ -22,12 +32,19 @@ your own workflow files as you practice.
 2. [GitHub Actions Architecture](#2-github-actions-architecture)
 3. [Workflow File Anatomy](#3-workflow-file-anatomy)
 4. [Lesson 01 — Workflow Basics](#4-lesson-01--workflow-basics)
+    - 4.4 [PRACTICE — Run Your First Pipeline](#44-practice--run-your-first-pipeline-you-do-this)
 5. [Lesson 02 — Backend CI Pipeline](#5-lesson-02--backend-ci-pipeline)
+    - 5.6 [PRACTICE — Run the Backend Pipeline](#56-practice--run-the-backend-pipeline-you-do-this)
 6. [Lesson 03 — Frontend CI Pipeline](#6-lesson-03--frontend-ci-pipeline)
+    - 6.4 [PRACTICE — Run the Frontend Pipeline](#64-practice--run-the-frontend-pipeline-you-do-this)
 7. [Lesson 04 — Composite Actions](#7-lesson-04--composite-actions)
+    - 7.6 [PRACTICE — Build & Run Composite Actions](#76-practice--build--run-composite-actions-you-do-this)
 8. [Lesson 05 — Reusable Workflows](#8-lesson-05--reusable-workflows)
+    - 8.5 [PRACTICE — Build & Call a Reusable Workflow](#85-practice--build--call-a-reusable-workflow-you-do-this)
 9. [Lesson 06 — Deployment Pipeline](#9-lesson-06--deployment-pipeline)
+    - 9.4 [PRACTICE — Prepare & Dry-Run Deployment](#94-practice--prepare--dry-run-deployment-you-do-this-safely)
 10. [Lesson 07 — Full Orchestration](#10-lesson-07--full-orchestration)
+    - 10.4 [Practice Lab — Parallel Execution on Feature1](#104-practice-lab--parallel-execution-on-the-feature1-branch)
 11. [Enterprise Patterns Reference](#11-enterprise-patterns-reference)
 12. [Self-Hosted Runners](#12-self-hosted-runners)
 13. [Configuration Reference](#13-configuration-reference)
@@ -453,6 +470,38 @@ jobs:
 - Each combination runs as a separate job on its own VM
 - Great for testing across multiple Python versions, Node versions, or OS types
 
+### 4.4 PRACTICE — Run Your First Pipeline (you do this)
+
+> **Important:** the workflow's `on:` triggers only match `main`/`develop`.
+> For practice we must ALSO trigger on `Feature1`. Two easy ways:
+> - **Option A (recommended):** after you copy the file, change line
+>   `branches: [main, develop]` to `branches: [main, develop, Feature1]`, or
+> - **Option B:** keep the file as-is and use the **Actions → Run workflow**
+>   button (it has `workflow_dispatch:`) to trigger it manually.
+
+**File to create:** `.github/workflows/01-basic-ci.yml`
+
+1. Copy the entire workflow from §4.2 into that file (apply Option A above).
+2. Commit and push:
+   ```bash
+   git add .github/workflows/01-basic-ci.yml
+   git commit -m "practice: lesson 01 basic workflow"
+   git push origin Feature1
+   ```
+3. Open **Actions** → **Lesson 01 - Workflow Basics** → click the latest run.
+4. Verify — tick each box:
+   - [ ] `hello-world` job ran → expand "Print environment info" → you see your app name, runner OS, branch ref, `event_name: push`
+   - [ ] In "Set a variable" → "Use output" — the second echoed the build number from the first step (`${{ steps.my-output.outputs.build_number }}` worked)
+   - [ ] `conditional-job` ran but its two steps are both **skipped** (because this push was to Feature1, not main and not a PR) — the `if:` conditions worked
+   - [ ] `matrix-example` appears as **3 separate jobs** (3.11 / 3.12 / 3.13) running in parallel
+   - [ ] Three "Setup Python" steps installed 3 different Python versions
+5. Break it (learn by failing):
+   - In "Print environment info", remove the closing `"` from one `echo` line → push → the job fails red.
+   - Read the red log — it shows the exact line + exit code. Fix the quote, push again, watch it turn green.
+
+**You have finished Lesson 01 when:** all checkboxes above are ticked and you
+have deliberately caused AND fixed at least one red run.
+
 ---
 
 ## 5. Lesson 02 — Backend CI Pipeline
@@ -738,6 +787,35 @@ jobs:
 - `if: always()` forces the step to run regardless of previous outcomes
 - Essential for cleanup steps and artifact uploads
 
+### 5.6 PRACTICE — Run the Backend Pipeline (you do this)
+
+**File to create:** `.github/workflows/02-backend-ci.yml`
+
+> **TRAP to know:** this workflow has `paths: ["backend/**"]`. If you push ONLY
+> the `.yml` file, the `push` trigger **will not fire** (no backend file changed).
+> Two clean ways to make it run:
+> - **Option A:** add `Feature1` to `branches:` AND touch a real backend file
+>   (e.g. add a blank line at the end of `backend/app/main.py`, commit it
+>   together with the workflow).
+> - **Option B (simplest):** use the **Actions → Run workflow** button — manual
+>   runs ignore path filters and work on any branch.
+
+1. Copy the workflow from §5.4 into the file (prefer Option B to start).
+2. Push, then trigger the run.
+3. Verify — tick each box:
+   - [ ] **Cache hit:** look at the "Cache pip dependencies" step — on the FIRST run it says `Cache not found`; run it a SECOND time and it says `Cache restored from key` in ~2s. That's the 45s → 3s saving from §5.2.
+   - [ ] `lint` job ran `ruff check .` and `black --check .` against backend/ — both green.
+   - [ ] `typecheck` job ran `mypy` against backend/ — green.
+   - [ ] `test` job started a **PostgreSQL 15 service container** (see the green `services` badge) and tests connected using the container's port 5432.
+   - [ ] Test job finished and uploaded `coverage.xml` / coverage HTML as an **artifact** (bottom of the job summary → download it).
+   - [ ] All 3 jobs ran in parallel, not one after another.
+4. Break it:
+   - **Concurrency:** trigger the run, and ~5s later trigger it AGAIN. The first run is **cancelled** by the second (that's `concurrency + cancel-in-progress: true` working).
+   - **Lint fail:** add a deliberately unformatted line to a backend file (e.g. `x=1` with no spaces) → push → `black --check .` fails red with the exact file+line → fix the formatting → green again.
+
+**You have finished Lesson 02 when:** you have seen a cache hit, watched one run
+cancel another, and made the linter fail-then-pass.
+
 ---
 
 ## 6. Lesson 03 — Frontend CI Pipeline
@@ -874,6 +952,30 @@ jobs:
 - `.next/` contains the compiled Next.js application
 - Upload as artifact to pass between jobs or save for deployment
 - Deployment jobs can download this artifact instead of rebuilding
+
+### 6.4 PRACTICE — Run the Frontend Pipeline (you do this)
+
+**File to create:** `.github/workflows/03-frontend-ci.yml`
+
+> Same trigger trap as Lesson 02: this workflow has `paths: ["frontend/**"]`.
+> Either add `Feature1` to `branches:` together with a real frontend change
+> (e.g. edit `frontend/app/page.tsx`), or use **Actions → Run workflow**
+> (recommended — manual runs ignore path filters).
+
+1. Copy the workflow from §6.2 and push it.
+2. Trigger the run on `Feature1`.
+3. Verify — tick each box:
+   - [ ] `lint` job ran ESLint + TypeScript check against `frontend/` — green.
+   - [ ] `build` job ran `next build` and produced the `.next/` output — green.
+   - [ ] First run: `setup-node` step shows `Cache not found` → re-run → `Cache restored` (npm cache). Compare the two "Install dependencies" step durations.
+   - [ ] The build `.next` output was saved as an **artifact** (downloadable from the run summary).
+   - [ ] All jobs ran in parallel.
+4. Break it:
+   - Introduce a TypeScript error type: in the frontend, type something as `int` isn't valid… actually easiest: use an undeclared variable, e.g. `console.log(undeclaredVar)` in a file → `tsc` fails red → fix → green.
+   - Or run the workflow twice back-to-back and watch `concurrency` cancel the first (same demo as Lesson 02).
+
+**You have finished Lesson 03 when:** you have a green frontend run, a restored
+npm cache, and a downloadable `.next` artifact.
 
 ---
 
@@ -1064,6 +1166,34 @@ jobs:
 - In composite actions, you MUST specify `shell:` explicitly
 - Common options: `bash`, `pwsh` (PowerShell), `sh`
 
+### 7.6 PRACTICE — Build & Run Composite Actions (you do this)
+
+**Files to create (this lesson makes 3 files):**
+1. `.github/actions/setup-python-env/action.yml` — copy from §7.2
+2. `.github/actions/setup-node-env/action.yml` — copy from §7.3
+3. `.github/workflows/use-composite.yml` — copy from §7.4 (the caller). Its
+   trigger is plain `on: push`, so it **already runs on Feature1** — no trigger
+   changes needed.
+
+```bash
+git add .github/
+git commit -m "practice: lesson 04 composite actions"
+git push origin Feature1
+```
+
+1. Verify — tick each box:
+   - [ ] The run started on your push to `Feature1`
+   - [ ] In the `demo` job, the step **"Setup Python environment"** is expandable — click it: inside you see the individual composite steps (Setup Python, Cache pip, Install dependencies, Set output). That's the composite action "unwrapping" into the current job.
+   - [ ] Same for **"Setup Node environment"**.
+   - [ ] The final **"Verify setup"** step printed BOTH a Python AND a Node version — proving the second node step received the correct `inputs.working-directory` default (`frontend`) and cached via `frontend/package-lock.json`.
+   - [ ] Both composites ran in the SAME job/VM (this is the difference vs reusable workflows you'll see in Lesson 05).
+2. Break it:
+   - Delete the `shell: bash` line from any `run:` step inside a composite → push → the workflow fails with a **"shell not specified"**-style error. This is the #1 composite gotcha.
+   - Fix it → green again.
+
+**You have finished Lesson 04 when:** you can see composite steps expanding
+inside the demo job and you've hit-and-fixed the missing-`shell` error.
+
 ---
 
 ## 8. Lesson 05 — Reusable Workflows
@@ -1212,6 +1342,29 @@ jobs:
 | Need to pass secrets | No | Yes |
 | Need job-level outputs | No | Yes |
 | Cross-repo reuse | No | Yes |
+
+### 8.5 PRACTICE — Build & Call a Reusable Workflow (you do this)
+
+**Files to create:**
+1. `.github/workflows/05-reusable-workflow.yml` — the reusable one, copy from §8.2 (uses `on: workflow_call` — it CANNOT run by itself; that's the point)
+2. `.github/workflows/caller-example.yml` — copy from §8.3 (its trigger is `on: push`, so it runs on Feature1 for free)
+
+```bash
+git add .github/workflows/05-reusable-workflow.yml .github/workflows/caller-example.yml
+git commit -m "practice: lesson 05 reusable workflow"
+git push origin Feature1
+```
+
+1. Verify — tick each box:
+   - [ ] The **"Caller Workflow"** started on your push
+   - [ ] `backend-ci` job expands and shows it **called** a separate workflow — you'll see a "Reusable workflow" link to its own run (viewable on the GitHub Actions page for `05-reusable-workflow.yml`). Its `lint`, `test`, `security` jobs ran as **separate jobs on separate runners** — contrast this with §7.4 where the composites ran *inside* `demo`.
+   - [ ] The caller passed `python-version: "3.13"`, `run-tests: true`, `run-security: true` — and the reusable workflow used them (`${{ inputs.* }}`)
+   - [ ] `deploy` job waited for `backend-ci` (`needs:`) and printed **`Test result: success`** — that string came from the reusable workflow's job output (`${{ jobs.test.result }}`) passed back through `outputs.test-result`
+2. Break it:
+   - In the caller, set `run-tests: false` → push → reusable `test` job is **skipped** (because of `if: ${{ inputs.run-tests }}`), while `lint`+`security` still run. You've now used a workflow *input to toggle a job on/off*.
+
+**You have finished Lesson 05 when:** you can see a nested reusable workflow run,
+read its `test-result` output back in the caller, and have skipped a job via `if:`.
 
 ---
 
@@ -1398,6 +1551,46 @@ jobs:
    - **Wait timer:** Add a delay (e.g., 5 minutes) before deployment starts
    - **Branch restrictions:** Only allow deployments from `main`
 5. Click **Save protection rules**
+
+### 9.4 PRACTICE — Prepare & Dry-Run Deployment (you do this SAFELY)
+
+> Deployment is the ONLY lesson where you could break production. Practice in
+> this order, and never pick `production` while learning.
+
+**File to create:** `.github/workflows/06-deploy-ec2.yml` (copy from §9.2)
+
+**Part 1 — Watch the trigger guard (safe, do first):**
+```bash
+git add .github/workflows/06-deploy-ec2.yml
+git commit -m "practice: lesson 06 deploy workflow"
+git push origin Feature1
+```
+Go to **Actions** — nothing ran. Why? The `push` trigger only matches `main`
+(§9.2 line `branches: [main]`). This morning's guard is your first lesson: **a
+workflow only runs when its trigger matches the event AND the branch.**
+
+**Part 2 — Set up Environments (safe, 100% in the GitHub UI):**
+Follow §9.3 exactly to create BOTH `staging` and `production` environments.
+Give both: **Required reviewers** = yourself/teammate, **Wait timer** = 1 minute,
+**Branch restrictions** = `main`. No code changes needed.
+
+**Part 3 — Full-cycle practice against STAGING (real deploy, still safe):**
+1. **Actions → Lesson 06** → **Run workflow** → on branch `Feature1` → choose
+   `staging` → Run.
+2. Watch the run go through a **Wait timer** (deployment pauses — that's the
+   environment protection rule working) → reviewers **approve** → deploy proceeds.
+3. Verify:
+   - [ ] `deploy-static` job paused at "Waiting for review", then ran after you approved
+   - [ ] Secrets used in SSH steps show as `***` in logs (never plaintext)
+   - [ ] The deployment appeared in **Settings → Environments → staging → Active deployments** (it keeps full history)
+4. Confirm the OIDC job `deploy-oidc` is **skipped** (`if: false`) — it stays off until §13/OIDC setup is configured.
+
+**Break it (safe version):** in the `workflow_dispatch` input options, delete
+`staging` (leave only `production`) → run again with the now-only option… then
+watch reviewers/branch restriction block it from `Feature1`. Fix it back.
+
+**You have finished Lesson 06 when:** the trigger guard, environment protection
+(wait + review), and secret masking are all real experiences you've watched.
 
 ---
 
@@ -1593,6 +1786,127 @@ typecheck -------------> deploy-staging (develop branch only)
 - `if: github.ref == 'refs/heads/develop'` → staging only
 - `if: github.ref == 'refs/heads/main'` → production only
 - PRs run tests but skip deployment (no deploy job matches)
+
+### 10.4 PRACTICE LAB — Parallel Execution on the `Feature1` Branch
+
+**Goal:** Practice true parallelism safely on your own branch, using real
+commands against the actual VALP SYSTEMS repo — no production risk.
+
+> **Why a separate branch?** `main` and `develop` are protected. On `Feature1`
+> you control everything: you can freely create the `needs:` DAG below, watch
+> jobs race in parallel, then change them again. Pushing to `Feature1` never
+> triggers a deployment (our deploy jobs only match `main`/`develop`).
+
+#### Step 1 — Attach to `Feature1`
+
+```bash
+git checkout -b Feature1        # create once
+git checkout Feature1           # or just switch to it
+```
+
+If it's already pushed to GitHub, this still works — GitHub Actions runs on any
+branch. Make sure the branch exists remotely so the Actions tab shows the runs.
+
+#### Step 2 — Create the parallel practice workflow
+
+Create `.github/workflows/practice-parallel.yml` in the `Feature1` branch:
+
+```yaml
+name: "Practice - Parallel DAG (Feature1)"
+
+on:
+  push:
+    branches: [Feature1]   # ONLY runs on your feature branch
+
+jobs:
+
+  # ---- TIER 1: three jobs start TOGETHER (in parallel) --------------------
+  backend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Feat: backend lint start $(date +%T)" 
+      - run: pip install ruff && ruff check backend true || true
+      - run: echo "Feat: backend lint done  $(date +%T)"
+
+  frontend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Feat: frontend lint start $(date +%T)"
+      - run: echo "Feat: frontend lint done  $(date +%T)"
+
+  # This job sleeps to prove ALL tier-1 jobs run at the SAME TIME
+  sleep-and-signal:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Feat: dummy start $(date +%T)"
+      - run: sleep 30
+      - run: echo "Feat: dummy done  $(date +%T)"
+
+  # ---- TIER 2: wait for ALL tier-1 jobs (needs:) ---------------------------
+  gather:
+    runs-on: ubuntu-latest
+    # needs: will NOT start until every listed job finishes.
+    # If any fails, this job is skipped (proves fail-fast / dependency rules).
+    needs: [backend-lint, frontend-lint, sleep-and-signal]
+    steps:
+      - run: echo "Feat: all tier-1 completed. This started at $(date +%T)"
+```
+
+#### Step 3 — Run it and interpret the DAG
+
+```bash
+git add .github/workflows/practice-parallel.yml
+git commit -m "practice: parallel DAG on Feature1"
+git push origin Feature1
+```
+
+Then go to **Actions** → meaning in the run viewer:
+- The **three tier-1 jobs begin at the same time** — the timestamps `$(date +%T)`
+  will show `backend-lint`, `frontend-lint`, and `sleep-and-signal` all starting
+  within the same second.
+- The **`gather` job does not start until all three finish** — if you open the
+  graph view, you'll see `needs:` arrows drawn from the 3 tier-1 boxes into
+  `gather`. This is the visual proof of parallelism + dependency.
+- Because `sleep-and-signal` waits 30s, `gather` is delayed by ~30s even though
+  the other two finish almost instantly — this proves `needs:` blocks until
+  EVERY dependency is done, not just the first.
+
+#### What to watch in the browser?
+
+| What you'll see | Concept it proves |
+|-----------------|-------------------|
+| 3 jobs start at the same time | **Parallel execution** — multiple runners at once |
+| `gather` waits | **Job dependency** — `needs:` blocks |
+| Graph arrows across jobs | **DAG (Directed Acyclic Graph)** — the pipeline topology |
+| Failing one tier-1 job skips `gather` | **Fail-fast** + transitive failure |
+
+#### Step 4 — Go further (keep practicing on Feature1)
+
+1. **Add a matrix** — change `backend-lint`'s `runs-on` to a matrix over Python
+   3.11/3.12/3.13; now 3 extra parallel jobs spawn inside that single job.
+2. **Free/slowen the critical path** — move `sleep-and-signal` from tier 1 to a
+   `needs:` chain so you can watch serialization (total time grows).
+3. **Concurrency** — push two commits quickly to Feature1 and see the second
+   run cancel the first (`cancel-in-progress: true`).
+4. **Mix hosted + self-hosted** — after §12, set `runs-on: [self-hosted, valp]`
+   on one tier-1 job and keep the others `ubuntu-latest`; watch them still
+   start in parallel even though they run on different machines.
+
+#### Step 5 — Tidy up after practicing
+
+```bash
+# You can leave Feature1; the workflow only triggers on pushes to Feature1.
+# To stop it running, delete the file:
+git rm .github/workflows/practice-parallel.yml
+git commit -m "practice: remove parallel lab"
+git push origin Feature1
+```
+
+> **Key insight:** In GitHub Actions, **jobs** are the unit of parallelism —
+> run as many as you like; **steps** within a job always run one after another.
+> The `needs:` keyword is what (re-)joins parallel branches into a single path.
 
 ---
 
@@ -2052,26 +2366,33 @@ Configure these in **Settings > Secrets and variables > Actions**:
 
 ## 14. Learning Checklist
 
+> **Do every phase on your `Feature1` branch.** Remember: each lesson's workflow
+> needs to run on `Feature1` — either add `Feature1` to its `branches:` list or
+> trigger it manually with the **Actions → Run workflow** button. Tick boxes ONLY
+> once the related PRACTICE section template-equivalent is all green.
+
 ### Phase 1: Basics (Lessons 01-03)
-- [ ] Create `.github/workflows/01-basic-ci.yml` and push
-- [ ] Verify workflow appears in GitHub Actions tab
-- [ ] Understand triggers, jobs, steps
-- [ ] Create `02-backend-ci.yml` with caching
-- [ ] Create `03-frontend-ci.yml` with npm caching
-- [ ] Verify caching works (check second run speed)
+- [ ] Create `.github/workflows/01-basic-ci.yml` and push (§4.4)
+- [ ] See 3 parallel jobs + the matrix fan-out in the Actions tab
+- [ ] Deliberately break a step, watch it fail red, then fix it
+- [ ] Create `02-backend-ci.yml` with caching + concurrency (§5.6)
+- [ ] Watch a cache restore + one run cancel another
+- [ ] Create `03-frontend-ci.yml` with npm caching (§6.4)
+- [ ] Download the `.next/` build artifact
 
 ### Phase 2: Intermediate (Lessons 04-05)
-- [ ] Create `.github/actions/setup-python-env/action.yml`
-- [ ] Create `.github/actions/setup-node-env/action.yml`
-- [ ] Use composite actions in a workflow
-- [ ] Create `05-reusable-workflow.yml`
-- [ ] Call reusable workflow from another workflow
+- [ ] Create `.github/actions/setup-python-env/action.yml` (§7.6)
+- [ ] Create `.github/actions/setup-node-env/action.yml` (§7.6)
+- [ ] See composite steps expand inside the caller job
+- [ ] Hit-and-fix the missing `shell:` composite error
+- [ ] Create `05-reusable-workflow.yml` (§8.5)
+- [ ] Call it from `caller-example.yml` and read its `test-result` output
 
 ### Phase 3: Advanced (Lessons 06-07)
-- [ ] Configure GitHub Secrets (at least SSH keys)
-- [ ] Create `06-deploy-ec2.yml` with SSH deployment
-- [ ] Create GitHub Environments (staging, production)
-- [ ] Configure environment protection rules
+- [ ] Create `06-deploy-ec2.yml` and confirm it does NOT run on `Feature1` push (§9.4)
+- [ ] Create GitHub Environments (`staging`, `production`) + protection rules
+- [ ] Run a full staging deploy through the wait timer + reviewer approval
+- [ ] Complete the §10.4 parallel practice lab (DAG, `needs:`, concurrency)
 - [ ] Create `07-full-pipeline.yml` complete orchestration
 
 ### Phase 4: Enterprise
