@@ -1,0 +1,43 @@
+name: ci basic pipleline
+on:
+    push:
+        branches: [dev, main]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+
+    
+env:
+    APP_NAME: "VALP_SYSTEMS"
+    PYTHON_VERSION: "3.14"
+
+
+
+jobs:
+    hello_world:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: code_checkout
+              run: actions/checkout@v4
+
+            - name: calling the environment variables
+              run: |
+                echo "Application Name: ${{env.APP_NAME}}"
+                echo "Application Version: ${{env.PYTHON_VERSION}}"
+                echo "Runner Os version: ${{runner.os}}"
+                echo "Runner Arch: ${{runner.arch}}"
+                echo "Github ref: ${{github.ref}}"
+                echo "Triggered by: ${{github.event_name}}"
+
+            - name: output values define
+              id: my-output
+              run: |
+                echo "build_number=$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+                echo "time_stamp=$(date -u +%Y-%m-%dT%H:%m:%SZ)" >> "$GITHUB_OUTPUT"
+
+            - name: calling_output Values
+              run: |
+                echo "Build_Number: ${{steps.my-output.outputs.build_number}}"
+                echo "Time_stamp: ${{steps.my-output.outputs.time_stamp}}"
+
