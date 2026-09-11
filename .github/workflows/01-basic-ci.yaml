@@ -41,3 +41,19 @@ jobs:
                 echo "Build_Number: ${{steps.my-output.outputs.build_number}}"
                 echo "Time_stamp: ${{steps.my-output.outputs.time_stamp}}"
 
+    conditional-job:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v4
+
+            - name: condition specific check if it is main brach only
+              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+              run: echo "this will run on the only push and main branch"
+
+            - name: this will run on only the pull_request
+              if: github.event_name == 'pull_request'
+              run: echo "this will run only the pull request"
+        
+
+
