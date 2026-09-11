@@ -19,7 +19,7 @@ jobs:
 
         steps:
             - name: code_checkout
-              run: actions/checkout@v4
+              uses: actions/checkout@v4
 
             - name: calling the environment variables
               run: |
