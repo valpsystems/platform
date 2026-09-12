@@ -51,15 +51,11 @@ class BaseRepository[ModelType]:
         return instances
 
     async def get(self, id: str) -> ModelType | None:
-        result = await self.session.execute(
-            self._base_query().where(self.model.id == id)
-        )
+        result = await self.session.execute(self._base_query().where(self.model.id == id))
         return result.scalar_one_or_none()
 
     async def get_by_ids(self, ids: list[str]) -> Sequence[ModelType]:
-        result = await self.session.execute(
-            self._base_query().where(self.model.id.in_(ids))
-        )
+        result = await self.session.execute(self._base_query().where(self.model.id.in_(ids)))
         return result.scalars().all()
 
     async def get_active(self, id: str) -> ModelType | None:
@@ -196,9 +192,7 @@ class BaseRepository[ModelType]:
         stmt = self._base_query()
         if query and fields:
             conditions = [
-                getattr(self.model, field).ilike(f"%{query}%")
-                for field in fields
-                if hasattr(self.model, field)
+                getattr(self.model, field).ilike(f"%{query}%") for field in fields if hasattr(self.model, field)
             ]
             if conditions:
                 stmt = stmt.where(reduce(operator.or_, conditions))
@@ -217,9 +211,7 @@ class BaseRepository[ModelType]:
         for field, direction in sorts:
             if hasattr(self.model, field):
                 column = getattr(self.model, field)
-                order_clauses.append(
-                    desc(column) if direction.lower() == "desc" else asc(column)
-                )
+                order_clauses.append(desc(column) if direction.lower() == "desc" else asc(column))
         if order_clauses:
             stmt = stmt.order_by(*order_clauses)
         return stmt

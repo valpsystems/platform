@@ -15,13 +15,9 @@ if TYPE_CHECKING:
 class Role(Base):
     __tablename__ = "roles"
 
-    name: Mapped[str] = mapped_column(
-        String(100), unique=True, index=True, nullable=False
-    )
+    name: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    is_system_role: Mapped[bool] = mapped_column(
-        Boolean, default=False, nullable=False
-    )
+    is_system_role: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     users: Mapped[list[User]] = relationship(
         "User",
@@ -36,4 +32,3 @@ class Role(Base):
         back_populates="roles",
         lazy="selectin",
     )
-

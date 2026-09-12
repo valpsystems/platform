@@ -18,12 +18,8 @@ if TYPE_CHECKING:
 class User(Base):
     __tablename__ = "users"
 
-    email: Mapped[str] = mapped_column(
-        String(255), unique=True, index=True, nullable=False
-    )
-    username: Mapped[str] = mapped_column(
-        String(100), unique=True, index=True, nullable=False
-    )
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    username: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     first_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     last_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
@@ -37,43 +33,29 @@ class User(Base):
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_locked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    login_attempts: Mapped[int] = mapped_column(
-        Integer, default=0, nullable=False
-    )
-    last_login_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    login_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_login_ip: Mapped[str | None] = mapped_column(String(45), nullable=True)
 
-    password_changed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    require_password_change: Mapped[bool] = mapped_column(
-        Boolean, default=False, nullable=False
-    )
+    password_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    require_password_change: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
-    two_factor_enabled: Mapped[bool] = mapped_column(
-        Boolean, default=False, nullable=False
-    )
+    two_factor_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     two_factor_secret: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    roles: Mapped[list[Role]] = relationship(
-        "Role",
-        secondary="user_roles",
-        back_populates="users",
-        lazy="selectin")
+    roles: Mapped[list[Role]] = relationship("Role", secondary="user_roles", back_populates="users", lazy="selectin")
 
     refresh_tokens: Mapped[list[RefreshToken]] = relationship(
-        "RefreshToken", back_populates="user", lazy="selectin",
-        cascade="all, delete-orphan")
+        "RefreshToken", back_populates="user", lazy="selectin", cascade="all, delete-orphan"
+    )
 
     login_history: Mapped[list[LoginHistory]] = relationship(
-        "LoginHistory", back_populates="user", lazy="selectin",
-        cascade="all, delete-orphan")
+        "LoginHistory", back_populates="user", lazy="selectin", cascade="all, delete-orphan"
+    )
 
     audit_logs: Mapped[list[AuditLog]] = relationship(
-        "AuditLog", back_populates="actor", lazy="selectin",
-        foreign_keys="AuditLog.actor_id")
+        "AuditLog", back_populates="actor", lazy="selectin", foreign_keys="AuditLog.actor_id"
+    )
 
     def dict(self) -> dict[str, Any]:
         return {
@@ -112,11 +94,7 @@ class User(Base):
     def has_permission(self, permission: str) -> bool:
         if self.is_superuser:
             return True
-        return any(
-            perm.codename == permission
-            for role in self.roles
-            for perm in role.permissions
-        )
+        return any(perm.codename == permission for role in self.roles for perm in role.permissions)
 
     def has_permissions(self, *permissions: str) -> bool:
         return all(self.has_permission(p) for p in permissions)
@@ -128,4 +106,3 @@ class User(Base):
         self.login_attempts = 0
         self.is_locked = False
         self.locked_until = None
-

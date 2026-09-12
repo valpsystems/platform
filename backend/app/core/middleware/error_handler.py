@@ -22,7 +22,8 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
                 message=exc.message,
                 status=exc.status_code,
                 path=request.url.path,
-                request_id=getattr(request.state, "request_id", None))
+                request_id=getattr(request.state, "request_id", None),
+            )
             return JSONResponse(
                 status_code=exc.status_code,
                 content={
@@ -30,12 +31,12 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
                     "message": exc.message,
                     "errorCode": exc.error_code,
                     "timestamp": datetime.now(UTC).isoformat(),
-                })
+                },
+            )
         except Exception:
             error_logger.exception(
-                "Unhandled exception",
-                path=request.url.path,
-                request_id=getattr(request.state, "request_id", None))
+                "Unhandled exception", path=request.url.path, request_id=getattr(request.state, "request_id", None)
+            )
             return JSONResponse(
                 status_code=500,
                 content={
@@ -43,4 +44,5 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
                     "message": "An unexpected error occurred",
                     "errorCode": "INTERNAL_ERROR",
                     "timestamp": datetime.now(UTC).isoformat(),
-                })
+                },
+            )

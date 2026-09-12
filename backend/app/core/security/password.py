@@ -25,9 +25,7 @@ def is_password_strong(password: str) -> tuple[bool, list[str]]:
     errors: list[str] = []
 
     if len(password) < settings.PASSWORD_MIN_LENGTH:
-        errors.append(
-            f"Password must be at least {settings.PASSWORD_MIN_LENGTH} characters long"
-        )
+        errors.append(f"Password must be at least {settings.PASSWORD_MIN_LENGTH} characters long")
 
     if settings.PASSWORD_REQUIRE_UPPERCASE and not re.search(r"[A-Z]", password):
         errors.append("Password must contain at least one uppercase letter")
@@ -38,9 +36,7 @@ def is_password_strong(password: str) -> tuple[bool, list[str]]:
     if settings.PASSWORD_REQUIRE_DIGIT and not re.search(r"\d", password):
         errors.append("Password must contain at least one digit")
 
-    if settings.PASSWORD_REQUIRE_SPECIAL and not re.search(
-        r"[!@#$%^&*()_+\-=\[\]{}|;':\",./<>?`~]", password
-    ):
+    if settings.PASSWORD_REQUIRE_SPECIAL and not re.search(r"[!@#$%^&*()_+\-=\[\]{}|;':\",./<>?`~]", password):
         errors.append("Password must contain at least one special character")
 
     return (len(errors) == 0, errors)

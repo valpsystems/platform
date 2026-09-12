@@ -10,48 +10,27 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 class Base(DeclarativeBase):
     __abstract__ = True
 
-    id: Mapped[str] = mapped_column(
-        String(36),
-        primary_key=True,
-        default=lambda: str(__import__("uuid").uuid4()))
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        default=lambda: datetime.now(UTC),
-        nullable=False)
+        DateTime(timezone=True), server_default=func.now(), default=lambda: datetime.now(UTC), nullable=False
+    )
 
     updated_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=True)
+        DateTime(timezone=True), onupdate=lambda: datetime.now(UTC), nullable=True
+    )
 
-    created_by: Mapped[str | None] = mapped_column(
-        String(36),
-        nullable=True)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
-    updated_by: Mapped[str | None] = mapped_column(
-        String(36),
-        nullable=True)
+    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
-    is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        default=True,
-        nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
-    is_deleted: Mapped[bool] = mapped_column(
-        Boolean,
-        default=False,
-        nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
-    deleted_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    version: Mapped[int] = mapped_column(
-        Integer,
-        default=1,
-        nullable=False)
+    version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
 
     def dict(self) -> dict[str, Any]:
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

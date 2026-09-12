@@ -34,7 +34,7 @@ jobs:
               uses: actions/cache@v4
               with:
                 path: ~/.cache/pip
-                key: ${{runner.os}}-pip-${{'hashFiles(backend/requirements.txt)'}}
+                key: ${{runner.os}}-pip-${{hashFiles('backend/requirements.txt')}}
                 restore-keys: |
                   ${{runner.os}}-pip
 
@@ -66,14 +66,14 @@ jobs:
           uses: actions/cache@v4
           with:
             path: ~/.cache/pip
-            key: ${{runner.os}}-pip-${{'hashFiles(backend/requirements.txt)'}}
+            key: ${{runner.os}}-pip-${{hashFiles('backend/requirements.txt')}}
             restore-keys: |
               ${{runner.os}}-pip
 
         - name: install dependencies
           run: |
             python -m pip install --upgrade pip
-            pip install -r backend/requirement.txt
+            pip install -r backend/requirements.txt
 
         - name: type check
           working-directory: backend

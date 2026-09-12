@@ -22,7 +22,9 @@ class PermissionRepository(BaseRepository[Permission]):
 
     async def codename_exists(self, codename: str) -> bool:
         result = await self.session.execute(
-            select(func.count()).select_from(Permission).where(
+            select(func.count())
+            .select_from(Permission)
+            .where(
                 Permission.codename == codename,
                 Permission.is_deleted.is_(False),
             )

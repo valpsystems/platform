@@ -26,6 +26,7 @@ async def test_unique_email_constraint(db_session: AsyncSession) -> None:
     repo = NewsletterRepository(db_session)
     await repo.create(email="unique@example.com", is_subscribed=True)
     import pytest
+
     with pytest.raises(Exception):
         await repo.create(email="unique@example.com", is_subscribed=True)
 

@@ -17,23 +17,20 @@ class AuditLogRepository(BaseRepository[AuditLog]):
     async def get_by_actor(self, actor_id: str, limit: int = 50) -> Sequence[AuditLog]:
         result = await self.session.execute(
             select(AuditLog)
-            .where(
-                AuditLog.actor_id == actor_id,
-                AuditLog.is_deleted.is_(False))
+            .where(AuditLog.actor_id == actor_id, AuditLog.is_deleted.is_(False))
             .order_by(AuditLog.performed_at.desc())
             .limit(limit)
         )
         return result.scalars().all()
 
-    async def get_by_resource(
-        self, resource_type: str, resource_id: str, limit: int = 50
-    ) -> Sequence[AuditLog]:
+    async def get_by_resource(self, resource_type: str, resource_id: str, limit: int = 50) -> Sequence[AuditLog]:
         result = await self.session.execute(
             select(AuditLog)
             .where(
                 AuditLog.resource_type == resource_type,
                 AuditLog.resource_id == resource_id,
-                AuditLog.is_deleted.is_(False))
+                AuditLog.is_deleted.is_(False),
+            )
             .order_by(AuditLog.performed_at.desc())
             .limit(limit)
         )
@@ -42,9 +39,7 @@ class AuditLogRepository(BaseRepository[AuditLog]):
     async def get_by_action(self, action: str, limit: int = 50) -> Sequence[AuditLog]:
         result = await self.session.execute(
             select(AuditLog)
-            .where(
-                AuditLog.action == action,
-                AuditLog.is_deleted.is_(False))
+            .where(AuditLog.action == action, AuditLog.is_deleted.is_(False))
             .order_by(AuditLog.performed_at.desc())
             .limit(limit)
         )
@@ -54,16 +49,13 @@ class AuditLogRepository(BaseRepository[AuditLog]):
         cutoff = datetime.now(UTC).replace(tzinfo=None)
         cutoff = cutoff.replace(hour=0, minute=0, second=0, microsecond=0)
         from datetime import timedelta
+
         cutoff = cutoff - timedelta(days=days)
 
         result = await self.session.execute(
-            select(func.count()).select_from(AuditLog).where(
-                AuditLog.performed_at < cutoff
-            )
+            select(func.count()).select_from(AuditLog).where(AuditLog.performed_at < cutoff)
         )
         count = result.scalar() or 0
 
-        await self.session.execute(
-            select(AuditLog).where(AuditLog.performed_at < cutoff)
-        )
+        await self.session.execute(select(AuditLog).where(AuditLog.performed_at < cutoff))
         return count

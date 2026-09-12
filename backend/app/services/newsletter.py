@@ -15,19 +15,14 @@ class NewsletterService:
         self.email_service = EmailService()
 
     async def subscribe(self, request: NewsletterRequest) -> dict:
-        app_logger.info(
-            "Processing newsletter subscription",
-            email=request.email,
-            name=request.name)
+        app_logger.info("Processing newsletter subscription", email=request.email, name=request.name)
 
         existing = await self.repository.first(email=request.email)
         if existing:
             if not existing.is_subscribed:
                 await self.repository.update(
-                    existing.id,
-                    is_subscribed=True,
-                    status=SubscriptionStatus.ACTIVE,
-                    unsubscribed_at=None)
+                    existing.id, is_subscribed=True, status=SubscriptionStatus.ACTIVE, unsubscribed_at=None
+                )
             subscriber = existing
         else:
             subscriber = await self.repository.create(
@@ -35,11 +30,10 @@ class NewsletterService:
                 name=request.name,
                 is_subscribed=True,
                 status=SubscriptionStatus.ACTIVE,
-                subscribed_at=datetime.now(UTC))
+                subscribed_at=datetime.now(UTC),
+            )
 
-        await self.email_service.send_newsletter_confirmation(
-            email=request.email,
-            name=request.name or "Subscriber")
+        await self.email_service.send_newsletter_confirmation(email=request.email, name=request.name or "Subscriber")
 
         return {
             "id": subscriber.id,
