@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3_version
 """Database seeding script - prepared for Phase 4."""
 
 from __future__ import annotations
