@@ -74,11 +74,7 @@ async def get_current_user(
 
     user_data = user.dict()
     user_data["roles"] = [{"id": r.id, "name": r.name} for r in user.roles]
-    user_data["permissions"] = list(set(
-        perm.codename
-        for role in user.roles
-        for perm in role.permissions
-    ))
+    user_data["permissions"] = list(set(perm.codename for role in user.roles for perm in role.permissions))
     return user_data
 
 
@@ -105,9 +101,7 @@ class PermissionChecker:
             return current_user
 
         user_permissions = set(current_user.get("permissions", []))
-        missing = [
-            p for p in self.required_permissions if p not in user_permissions
-        ]
+        missing = [p for p in self.required_permissions if p not in user_permissions]
         if missing:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

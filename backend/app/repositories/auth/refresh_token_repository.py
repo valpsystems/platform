@@ -16,18 +16,14 @@ class RefreshTokenRepository(BaseRepository[RefreshToken]):
 
     async def get_by_token_hash(self, token_hash: str) -> RefreshToken | None:
         result = await self.session.execute(
-            select(RefreshToken).where(
-                RefreshToken.token_hash == token_hash,
-                RefreshToken.is_deleted.is_(False))
+            select(RefreshToken).where(RefreshToken.token_hash == token_hash, RefreshToken.is_deleted.is_(False))
         )
         return result.scalar_one_or_none()
 
     async def revoke(self, token_id: str) -> None:
         now = datetime.now(UTC)
         await self.session.execute(
-            update(RefreshToken)
-            .where(RefreshToken.id == token_id)
-            .values(is_revoked=True, revoked_at=now)
+            update(RefreshToken).where(RefreshToken.id == token_id).values(is_revoked=True, revoked_at=now)
         )
         await self.session.flush()
 
@@ -36,9 +32,8 @@ class RefreshTokenRepository(BaseRepository[RefreshToken]):
         await self.session.execute(
             update(RefreshToken)
             .where(
-                RefreshToken.user_id == user_id,
-                RefreshToken.is_revoked.is_(False),
-                RefreshToken.is_deleted.is_(False))
+                RefreshToken.user_id == user_id, RefreshToken.is_revoked.is_(False), RefreshToken.is_deleted.is_(False)
+            )
             .values(is_revoked=True, revoked_at=now)
         )
         await self.session.flush()
@@ -50,15 +45,14 @@ class RefreshTokenRepository(BaseRepository[RefreshToken]):
                 RefreshToken.user_id == user_id,
                 RefreshToken.is_revoked.is_(False),
                 RefreshToken.expires_at > now,
-                RefreshToken.is_deleted.is_(False))
+                RefreshToken.is_deleted.is_(False),
+            )
         )
         return result.scalars().all()
 
     async def cleanup_expired(self) -> int:
         now = datetime.now(UTC)
-        result = await self.session.execute(
-            select(RefreshToken).where(RefreshToken.expires_at <= now)
-        )
+        result = await self.session.execute(select(RefreshToken).where(RefreshToken.expires_at <= now))
         expired = result.scalars().all()
         for token in expired:
             token.is_revoked = True

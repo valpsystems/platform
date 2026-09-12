@@ -16,31 +16,27 @@ class UserRepository(BaseRepository[User]):
 
     async def get_by_email(self, email: str) -> User | None:
         result = await self.session.execute(
-            select(User)
-            .options(selectinload(User.roles))
-            .where(User.email == email, User.is_deleted.is_(False))
+            select(User).options(selectinload(User.roles)).where(User.email == email, User.is_deleted.is_(False))
         )
         return result.unique().scalar_one_or_none()
 
     async def get_by_username(self, username: str) -> User | None:
         result = await self.session.execute(
-            select(User)
-            .options(selectinload(User.roles))
-            .where(User.username == username, User.is_deleted.is_(False))
+            select(User).options(selectinload(User.roles)).where(User.username == username, User.is_deleted.is_(False))
         )
         return result.unique().scalar_one_or_none()
 
     async def get_with_roles(self, user_id: str) -> User | None:
         result = await self.session.execute(
-            select(User)
-            .options(selectinload(User.roles))
-            .where(User.id == user_id, User.is_deleted.is_(False))
+            select(User).options(selectinload(User.roles)).where(User.id == user_id, User.is_deleted.is_(False))
         )
         return result.unique().scalar_one_or_none()
 
     async def email_exists(self, email: str) -> bool:
         result = await self.session.execute(
-            select(func.count()).select_from(User).where(
+            select(func.count())
+            .select_from(User)
+            .where(
                 User.email == email,
                 User.is_deleted.is_(False),
             )
@@ -49,7 +45,9 @@ class UserRepository(BaseRepository[User]):
 
     async def username_exists(self, username: str) -> bool:
         result = await self.session.execute(
-            select(func.count()).select_from(User).where(
+            select(func.count())
+            .select_from(User)
+            .where(
                 User.username == username,
                 User.is_deleted.is_(False),
             )

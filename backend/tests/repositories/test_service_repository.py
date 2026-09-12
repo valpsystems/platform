@@ -44,16 +44,25 @@ async def test_find_by_slug(db_session: AsyncSession) -> None:
 async def test_get_featured_services(db_session: AsyncSession) -> None:
     repo = ServiceRepository(db_session)
     await repo.create(
-        title="Service A", slug="service-a",
-        is_featured=True, display_order=1, status=ContentStatus.PUBLISHED,
+        title="Service A",
+        slug="service-a",
+        is_featured=True,
+        display_order=1,
+        status=ContentStatus.PUBLISHED,
     )
     await repo.create(
-        title="Service B", slug="service-b",
-        is_featured=False, display_order=2, status=ContentStatus.PUBLISHED,
+        title="Service B",
+        slug="service-b",
+        is_featured=False,
+        display_order=2,
+        status=ContentStatus.PUBLISHED,
     )
     await repo.create(
-        title="Service C", slug="service-c",
-        is_featured=True, display_order=3, status=ContentStatus.PUBLISHED,
+        title="Service C",
+        slug="service-c",
+        is_featured=True,
+        display_order=3,
+        status=ContentStatus.PUBLISHED,
     )
     featured = await repo.find_by(is_featured=True)
     assert len(featured) == 2

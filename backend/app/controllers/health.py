@@ -15,4 +15,5 @@ class HealthController:
                 "environment": settings.APP_ENV,
                 "timestamp": datetime.now(UTC).isoformat(),
             },
-            message="Service is healthy")
+            message="Service is healthy",
+        )
