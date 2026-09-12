@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
-from typing import Optional
 
 
 class EmailVerification(Base):
@@ -23,7 +22,7 @@ class EmailVerification(Base):
         DateTime(timezone=True), nullable=False
     )
     is_used: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    used_at: Mapped[Optional[datetime]] = mapped_column(
+    used_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 
@@ -31,8 +30,8 @@ class EmailVerification(Base):
     def is_expired(self) -> bool:
         expires = self.expires_at
         if expires.tzinfo is None:
-            expires = expires.replace(tzinfo=timezone.utc)
-        return datetime.now(timezone.utc) > expires
+            expires = expires.replace(tzinfo=UTC)
+        return datetime.now(UTC) > expires
 
     @property
     def is_valid(self) -> bool:

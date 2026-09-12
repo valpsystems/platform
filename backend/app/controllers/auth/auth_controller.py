@@ -23,7 +23,6 @@ from app.schemas.auth import (
 from app.schemas.auth.verify import ResendVerificationRequest, VerifyEmailRequest
 from app.services.auth import AuthService
 from app.utils.response import APIResponse
-from typing import Optional
 
 
 class AuthController:
@@ -65,7 +64,7 @@ class AuthController:
     async def logout(
         self,
         current_user: dict,
-        refresh_token: Optional[str] = None,
+        refresh_token: str | None = None,
     ) -> JSONResponse:
         result = await self.service.logout(
             user_id=current_user["id"],
@@ -152,7 +151,7 @@ class AuthController:
         result = await self.service.resend_verification(email=body.email)
         return APIResponse.success(message=result["message"])
 
-    def _get_ip(self, request: Request) -> Optional[str]:
+    def _get_ip(self, request: Request) -> str | None:
         forwarded = request.headers.get("X-Forwarded-For")
         if forwarded:
             return forwarded.split(",")[0].strip()

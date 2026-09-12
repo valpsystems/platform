@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -29,7 +29,7 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
                     "success": False,
                     "message": exc.message,
                     "errorCode": exc.error_code,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 })
         except Exception:
             error_logger.exception(
@@ -42,5 +42,5 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
                     "success": False,
                     "message": "An unexpected error occurred",
                     "errorCode": "INTERNAL_ERROR",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 })

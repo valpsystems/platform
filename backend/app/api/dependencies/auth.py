@@ -1,22 +1,22 @@
 from __future__ import annotations
 
-from typing import Annotated, Optional
+from typing import Annotated
 
-from fastapi import Depends, HTTPException, Header, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_db
 from app.core.security import JWTService
+from app.dependencies import get_db
 from app.repositories.auth import UserRepository
 
 security_scheme = HTTPBearer(auto_error=False)
 
 
 async def get_token_from_header(
-    authorization: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security_scheme)] = None,
-    x_api_key: Annotated[Optional[str], Header()] = None,
-) -> Optional[str]:
+    authorization: Annotated[HTTPAuthorizationCredentials | None, Depends(security_scheme)] = None,
+    x_api_key: Annotated[str | None, Header()] = None,
+) -> str | None:
     if authorization:
         return authorization.credentials
     if x_api_key:
@@ -25,7 +25,7 @@ async def get_token_from_header(
 
 
 async def get_current_user(
-    token: Annotated[Optional[str], Depends(get_token_from_header)],
+    token: Annotated[str | None, Depends(get_token_from_header)],
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     if not token:

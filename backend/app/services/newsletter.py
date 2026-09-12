@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.constants.enums import SubscriptionStatus
 from app.emails import EmailService
@@ -35,7 +35,7 @@ class NewsletterService:
                 name=request.name,
                 is_subscribed=True,
                 status=SubscriptionStatus.ACTIVE,
-                subscribed_at=datetime.now(timezone.utc))
+                subscribed_at=datetime.now(UTC))
 
         await self.email_service.send_newsletter_confirmation(
             email=request.email,

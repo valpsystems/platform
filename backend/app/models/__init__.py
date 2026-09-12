@@ -1,3 +1,15 @@
+from .auth import (
+    AuditLog,
+    EmailVerification,
+    LoginHistory,
+    PasswordReset,
+    Permission,
+    RefreshToken,
+    Role,
+    User,
+    role_permissions,
+    user_roles,
+)
 from .career_application import CareerApplication
 from .contact import Contact
 from .feedback import Feedback
@@ -7,8 +19,6 @@ from .resource import Resource
 from .service import Service
 from .solution import Solution
 from .technology import Technology
-
-from .auth import User, Role, Permission, role_permissions, user_roles, RefreshToken, EmailVerification, PasswordReset, LoginHistory, AuditLog
 
 __all__ = [
     "Contact",

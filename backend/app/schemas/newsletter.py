@@ -3,18 +3,17 @@ from __future__ import annotations
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
-from typing import Optional
 
 
 class NewsletterRequest(BaseModel):
     email: EmailStr
-    name: Optional[str] = Field(None, max_length=200)
+    name: str | None = Field(None, max_length=200)
 
 
 class NewsletterResponse(BaseModel):
     success: bool = True
     message: str = "Subscription successful"
-    data: Optional[dict] = None
+    data: dict | None = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -23,10 +22,10 @@ class NewsletterDBResponse(BaseModel):
 
     id: str
     email: str
-    name: Optional[str] = None
+    name: str | None = None
     is_subscribed: bool = True
     status: str = "active"
     subscribed_at: datetime
-    unsubscribed_at: Optional[datetime] = None
+    unsubscribed_at: datetime | None = None
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime | None = None

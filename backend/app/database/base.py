@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import Boolean, DateTime, Integer, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -18,19 +18,19 @@ class Base(DeclarativeBase):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False)
 
-    updated_at: Mapped[Optional[datetime]] = mapped_column(
+    updated_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
-        onupdate=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(UTC),
         nullable=True)
 
-    created_by: Mapped[Optional[str]] = mapped_column(
+    created_by: Mapped[str | None] = mapped_column(
         String(36),
         nullable=True)
 
-    updated_by: Mapped[Optional[str]] = mapped_column(
+    updated_by: Mapped[str | None] = mapped_column(
         String(36),
         nullable=True)
 
@@ -44,7 +44,7 @@ class Base(DeclarativeBase):
         default=False,
         nullable=False)
 
-    deleted_at: Mapped[Optional[datetime]] = mapped_column(
+    deleted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True)
 
@@ -59,7 +59,7 @@ class Base(DeclarativeBase):
     def soft_delete(self) -> None:
         self.is_deleted = True
         self.is_active = False
-        self.deleted_at = datetime.now(timezone.utc)
+        self.deleted_at = datetime.now(UTC)
 
     def restore(self) -> None:
         self.is_deleted = False

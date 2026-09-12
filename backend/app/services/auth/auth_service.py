@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import secrets
-from typing import Optional
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
 
@@ -17,14 +16,16 @@ from app.repositories.auth import (
     PermissionRepository,
     RefreshTokenRepository,
     RoleRepository,
-    UserRepository)
+    UserRepository,
+)
 from app.schemas.auth import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
     LoginRequest,
     RegisterRequest,
     ResetPasswordRequest,
-    UpdateProfileRequest)
+    UpdateProfileRequest,
+)
 from app.utils.logger import app_logger
 
 
@@ -45,7 +46,12 @@ class AuthService:
         self.login_history_repo = login_history_repo
         self.email_service = EmailService()
 
-    async def register(self, request: RegisterRequest, ip_address: Optional[str] = None, user_agent: Optional[str] = None) -> dict:
+    async def register(
+        self,
+        request: RegisterRequest,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+    ) -> dict:
         existing_email = await self.user_repo.email_exists(request.email)
         if existing_email:
             raise HTTPException(
@@ -70,9 +76,9 @@ class AuthService:
 
         default_role = await self.role_repo.get_by_name("user")
         if default_role:
-            from app.models.auth import user_roles
             from sqlalchemy import insert
-            from app.database.session import get_session
+
+            from app.models.auth import user_roles
             stmt = insert(user_roles).values(
                 user_id=user.id, role_id=default_role.id
             )
@@ -105,8 +111,8 @@ class AuthService:
     async def login(
         self,
         request: LoginRequest,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None) -> dict:
+        ip_address: str | None = None,
+        user_agent: str | None = None) -> dict:
         user = await self.user_repo.get_by_email(request.email)
         if not user:
             raise HTTPException(
@@ -119,7 +125,7 @@ class AuthService:
                 detail="Account is deactivated")
 
         if user.is_locked:
-            if user.locked_until and datetime.now(timezone.utc) < user.locked_until:
+            if user.locked_until and datetime.now(UTC) < user.locked_until:
                 raise HTTPException(
                     status_code=status.HTTP_423_LOCKED,
                     detail="Account is temporarily locked. Try again later.")
@@ -131,12 +137,12 @@ class AuthService:
             user.increment_login_attempts()
             if user.login_attempts >= 5:
                 user.is_locked = True
-                user.locked_until = datetime.now(timezone.utc) + timedelta(minutes=15)
+                user.locked_until = datetime.now(UTC) + timedelta(minutes=15)
             await self.user_repo.session.flush()
 
             await self.login_history_repo.create(
                 user_id=user.id,
-                login_at=datetime.now(timezone.utc),
+                login_at=datetime.now(UTC),
                 ip_address=ip_address,
                 user_agent=user_agent,
                 is_successful=False,
@@ -148,7 +154,7 @@ class AuthService:
                 detail="Invalid email or password")
 
         user.reset_login_attempts()
-        user.last_login_at = datetime.now(timezone.utc)
+        user.last_login_at = datetime.now(UTC)
         user.last_login_ip = ip_address
 
         access_expires = timedelta(
@@ -172,7 +178,7 @@ class AuthService:
             expires_delta=refresh_expires)
 
         token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
-        refresh_expiry = datetime.now(timezone.utc) + refresh_expires
+        refresh_expiry = datetime.now(UTC) + refresh_expires
 
         await self.refresh_token_repo.create(
             token_hash=token_hash,
@@ -184,7 +190,7 @@ class AuthService:
 
         await self.login_history_repo.create(
             user_id=user.id,
-            login_at=datetime.now(timezone.utc),
+            login_at=datetime.now(UTC),
             ip_address=ip_address,
             user_agent=user_agent,
             is_successful=True,
@@ -212,7 +218,7 @@ class AuthService:
             "user": user_data,
         }
 
-    async def logout(self, user_id: str, refresh_token: Optional[str] = None) -> dict:
+    async def logout(self, user_id: str, refresh_token: str | None = None) -> dict:
         if refresh_token:
             token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
             stored_token = await self.refresh_token_repo.get_by_token_hash(token_hash)
@@ -234,8 +240,8 @@ class AuthService:
     async def refresh_token(
         self,
         refresh_token: str,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None) -> dict:
+        ip_address: str | None = None,
+        user_agent: str | None = None) -> dict:
         payload = JWTService.decode_token(refresh_token)
         if not payload or payload.get("type") != "refresh":
             raise HTTPException(
@@ -284,7 +290,7 @@ class AuthService:
         await self.refresh_token_repo.create(
             token_hash=new_token_hash,
             user_id=user.id,
-            expires_at=datetime.now(timezone.utc) + refresh_expires,
+            expires_at=datetime.now(UTC) + refresh_expires,
             ip_address=ip_address,
             user_agent=user_agent)
 
@@ -372,7 +378,7 @@ class AuthService:
         await self.user_repo.update(
             user_id,
             password_hash=new_hash,
-            password_changed_at=datetime.now(timezone.utc),
+            password_changed_at=datetime.now(UTC),
             require_password_change=False)
 
         await self.refresh_token_repo.revoke_all_for_user(user_id)
@@ -396,8 +402,8 @@ class AuthService:
     async def forgot_password(
         self,
         request: ForgotPasswordRequest,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None) -> dict:
+        ip_address: str | None = None,
+        user_agent: str | None = None) -> dict:
         user = await self.user_repo.get_by_email(request.email)
 
         if not user:
@@ -406,7 +412,7 @@ class AuthService:
         from app.models.auth import PasswordReset as PasswordResetModel
         token = secrets.token_urlsafe(48)
         token_hash = hashlib.sha256(token.encode()).hexdigest()
-        expires_at = datetime.now(timezone.utc) + timedelta(
+        expires_at = datetime.now(UTC) + timedelta(
             hours=settings.PASSWORD_RESET_TOKEN_EXPIRE_HOURS
         )
 
@@ -443,10 +449,11 @@ class AuthService:
     async def reset_password(
         self,
         request: ResetPasswordRequest,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None) -> dict:
-        from app.models.auth import PasswordReset as PasswordResetModel
+        ip_address: str | None = None,
+        user_agent: str | None = None) -> dict:
         from sqlalchemy import select
+
+        from app.models.auth import PasswordReset as PasswordResetModel
 
         token_hash = hashlib.sha256(request.token.encode()).hexdigest()
         result = await self.user_repo.session.execute(
@@ -466,11 +473,11 @@ class AuthService:
         await self.user_repo.update(
             reset_record.user_id,
             password_hash=new_hash,
-            password_changed_at=datetime.now(timezone.utc))
+            password_changed_at=datetime.now(UTC))
 
         reset_record.is_used = True
-        reset_record.used_at = datetime.now(timezone.utc)
-        reset_record.reset_at = datetime.now(timezone.utc)
+        reset_record.used_at = datetime.now(UTC)
+        reset_record.reset_at = datetime.now(UTC)
 
         await self.refresh_token_repo.revoke_all_for_user(reset_record.user_id)
 
@@ -497,8 +504,9 @@ class AuthService:
         return {"message": "Password has been reset successfully"}
 
     async def verify_email(self, token: str) -> dict:
-        from app.models.auth import EmailVerification as EmailVerificationModel
         from sqlalchemy import select
+
+        from app.models.auth import EmailVerification as EmailVerificationModel
 
         token_hash = hashlib.sha256(token.encode()).hexdigest()
         result = await self.user_repo.session.execute(
@@ -519,7 +527,7 @@ class AuthService:
             is_email_verified=True)
 
         verification.is_used = True
-        verification.used_at = datetime.now(timezone.utc)
+        verification.used_at = datetime.now(UTC)
 
         await self.audit_log_repo.create(
             actor_id=verification.user_id,
@@ -557,7 +565,7 @@ class AuthService:
 
         token = secrets.token_urlsafe(48)
         token_hash = hashlib.sha256(token.encode()).hexdigest()
-        expires_at = datetime.now(timezone.utc) + timedelta(
+        expires_at = datetime.now(UTC) + timedelta(
             hours=settings.EMAIL_VERIFICATION_TOKEN_EXPIRE_HOURS
         )
 

@@ -5,14 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.auth import Permission
 from app.repositories.base import BaseRepository
-from typing import Optional
 
 
 class PermissionRepository(BaseRepository[Permission]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(Permission, session)
 
-    async def get_by_codename(self, codename: str) -> Optional[Permission]:
+    async def get_by_codename(self, codename: str) -> Permission | None:
         result = await self.session.execute(
             select(Permission).where(
                 Permission.codename == codename,

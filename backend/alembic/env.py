@@ -3,33 +3,33 @@ from __future__ import annotations
 import asyncio
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from alembic import context
 from app.core.config import settings
 from app.database.base import Base
 
 # Import all models so they are registered on Base.metadata
 from app.models import (  # noqa: F401
+    AuditLog,
     CareerApplication,
     Contact,
+    EmailVerification,
     Feedback,
+    LoginHistory,
     Newsletter,
+    PasswordReset,
+    Permission,
     QuoteRequest,
+    RefreshToken,
     Resource,
+    Role,
     Service,
     Solution,
     Technology,
     User,
-    Role,
-    Permission,
     role_permissions,
     user_roles,
-    RefreshToken,
-    EmailVerification,
-    PasswordReset,
-    LoginHistory,
-    AuditLog,
 )
 
 config = context.config
