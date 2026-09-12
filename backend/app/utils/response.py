@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import status
@@ -19,7 +19,7 @@ class APIResponse:
                 "success": True,
                 "message": message,
                 "data": data,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             })
 
     @staticmethod
@@ -37,7 +37,7 @@ class APIResponse:
                 "success": False,
                 "message": message,
                 "errorCode": error_code,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             })
 
     @staticmethod

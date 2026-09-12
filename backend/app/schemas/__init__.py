@@ -1,3 +1,15 @@
+from .auth import (
+    ChangePasswordRequest,
+    ForgotPasswordRequest,
+    LoginRequest,
+    LoginResponse,
+    ProfileResponse,
+    RegisterRequest,
+    RegisterResponse,
+    ResetPasswordRequest,
+    UserResponse,
+    VerifyEmailRequest,
+)
 from .career import CareerRequest, CareerResponse
 from .common import ErrorResponse, ValidationErrorResponse
 from .contact import ContactRequest, ContactResponse
@@ -9,19 +21,6 @@ from .resource import ResourceRequest, ResourceResponse
 from .service import ServiceRequest, ServiceResponse
 from .solution import SolutionRequest, SolutionResponse
 from .technology import TechnologyRequest, TechnologyResponse
-
-from .auth import (
-    LoginRequest,
-    LoginResponse,
-    RegisterRequest,
-    RegisterResponse,
-    ChangePasswordRequest,
-    ForgotPasswordRequest,
-    ResetPasswordRequest,
-    VerifyEmailRequest,
-    ProfileResponse,
-    UserResponse,
-)
 
 __all__ = [
     "HealthResponse",

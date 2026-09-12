@@ -50,5 +50,33 @@ jobs:
             - name: check black in python
               working-directory: backend
               run: black --check .
+    typecheck:
+      runs-on: ubuntu-latest
 
+      steps:
+        - name: checkout branch
+          uses: actions/checkout@v4
+
+        - name: setup python
+          uses: actions/setup-python@v5
+          with:
+            python-version: ${{env.PYTHON_VERSION}}
+
+        - name: cache dependecies
+          uses: actions/cache@v4
+          with:
+            path: ~/.cache/pip
+            key: ${{runner.os}}-pip-${{'hashFiles(backend/requirements.txt)'}}
+            restore-keys: |
+              ${{runner.os}}-pip
+
+        - name: install dependencies
+          run: |
+            python -m pip upgrade pip
+            pip install -r backend/requirement.txt
+
+        - name: type check
+          working-directory: backend
+          run: mypy app/
+      
 

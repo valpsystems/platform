@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from collections.abc import Sequence
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -51,9 +51,9 @@ class AuditLogRepository(BaseRepository[AuditLog]):
         return result.scalars().all()
 
     async def cleanup_old(self, days: int = 90) -> int:
-        cutoff = datetime.now(timezone.utc).replace(tzinfo=None)
+        cutoff = datetime.now(UTC).replace(tzinfo=None)
         cutoff = cutoff.replace(hour=0, minute=0, second=0, microsecond=0)
-        from datetime import timedelta, timezone
+        from datetime import timedelta
         cutoff = cutoff - timedelta(days=days)
 
         result = await self.session.execute(

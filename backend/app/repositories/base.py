@@ -3,17 +3,13 @@ from __future__ import annotations
 import operator
 from collections.abc import Sequence
 from functools import reduce
-from typing import Any, Generic, TypeVar, Optional
+from typing import Any
 
 from sqlalchemy import Select, UnaryExpression, asc, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.base import Base
 
-ModelType = TypeVar("ModelType", bound=Base)
-
-
-class PaginatedResult(Generic[ModelType]):
+class PaginatedResult[ModelType]:
     def __init__(
         self,
         items: Sequence[ModelType],
@@ -28,7 +24,7 @@ class PaginatedResult(Generic[ModelType]):
         self.pages = (total + page_size - 1) // page_size if page_size > 0 else 0
 
 
-class BaseRepository(Generic[ModelType]):
+class BaseRepository[ModelType]:
     def __init__(self, model: type[ModelType], session: AsyncSession) -> None:
         self.model = model
         self.session = session
@@ -54,7 +50,7 @@ class BaseRepository(Generic[ModelType]):
             await self.session.refresh(instance)
         return instances
 
-    async def get(self, id: str) -> Optional[ModelType]:
+    async def get(self, id: str) -> ModelType | None:
         result = await self.session.execute(
             self._base_query().where(self.model.id == id)
         )
@@ -66,7 +62,7 @@ class BaseRepository(Generic[ModelType]):
         )
         return result.scalars().all()
 
-    async def get_active(self, id: str) -> Optional[ModelType]:
+    async def get_active(self, id: str) -> ModelType | None:
         result = await self.session.execute(
             self._base_query().where(
                 self.model.id == id,
@@ -75,7 +71,7 @@ class BaseRepository(Generic[ModelType]):
         )
         return result.scalar_one_or_none()
 
-    async def first(self, **filters: Any) -> Optional[ModelType]:
+    async def first(self, **filters: Any) -> ModelType | None:
         stmt = self._base_query()
         for key, value in filters.items():
             stmt = stmt.where(getattr(self.model, key) == value)
@@ -93,7 +89,7 @@ class BaseRepository(Generic[ModelType]):
         self,
         skip: int = 0,
         limit: int = 100,
-        sorts: Optional[list[tuple[str, str]]] = None,
+        sorts: list[tuple[str, str]] | None = None,
     ) -> Sequence[ModelType]:
         stmt = self._base_query()
         stmt = self._apply_sorting(stmt, sorts)
@@ -105,7 +101,7 @@ class BaseRepository(Generic[ModelType]):
         self,
         page: int = 1,
         page_size: int = 20,
-        sorts: Optional[list[tuple[str, str]]] = None,
+        sorts: list[tuple[str, str]] | None = None,
         **filters: Any,
     ) -> PaginatedResult[ModelType]:
         base_stmt = self._base_query()
@@ -130,7 +126,7 @@ class BaseRepository(Generic[ModelType]):
             page_size=page_size,
         )
 
-    async def update(self, id: str, **kwargs: Any) -> Optional[ModelType]:
+    async def update(self, id: str, **kwargs: Any) -> ModelType | None:
         instance = await self.get(id)
         if instance is None:
             return None
@@ -158,7 +154,7 @@ class BaseRepository(Generic[ModelType]):
         await self.session.flush()
         return True
 
-    async def restore(self, id: str) -> Optional[ModelType]:
+    async def restore(self, id: str) -> ModelType | None:
         result = await self.session.execute(
             select(self.model).where(
                 self.model.id == id,
@@ -213,7 +209,7 @@ class BaseRepository(Generic[ModelType]):
     def _apply_sorting(
         self,
         stmt: Select,
-        sorts: Optional[list[tuple[str, str]]],
+        sorts: list[tuple[str, str]] | None,
     ) -> Select:
         if not sorts:
             return stmt.order_by(self.model.created_at.desc())

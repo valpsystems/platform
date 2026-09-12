@@ -3,7 +3,6 @@ from __future__ import annotations
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.core.config import settings
-from typing import Optional
 
 
 class RegisterRequest(BaseModel):
@@ -11,9 +10,9 @@ class RegisterRequest(BaseModel):
     username: str = Field(..., min_length=3, max_length=100, description="Unique username")
     password: str = Field(..., min_length=settings.PASSWORD_MIN_LENGTH, description="User password")
     confirm_password: str = Field(..., description="Confirm password")
-    first_name: Optional[str] = Field(default=None, max_length=100)
-    last_name: Optional[str] = Field(default=None, max_length=100)
-    phone: Optional[str] = Field(default=None, max_length=20)
+    first_name: str | None = Field(default=None, max_length=100)
+    last_name: str | None = Field(default=None, max_length=100)
+    phone: str | None = Field(default=None, max_length=20)
 
     @field_validator("username")
     @classmethod

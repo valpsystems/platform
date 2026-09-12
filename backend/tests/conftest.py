@@ -10,25 +10,25 @@ from app.database.base import Base
 from app.dependencies import get_db
 from app.main import app
 from app.models import (  # noqa: F401
+    AuditLog,
     CareerApplication,
     Contact,
+    EmailVerification,
     Feedback,
+    LoginHistory,
     Newsletter,
+    PasswordReset,
+    Permission,
     QuoteRequest,
+    RefreshToken,
     Resource,
+    Role,
     Service,
     Solution,
     Technology,
     User,
-    Role,
-    Permission,
     role_permissions,
     user_roles,
-    RefreshToken,
-    EmailVerification,
-    PasswordReset,
-    LoginHistory,
-    AuditLog,
 )
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///./.pytest_test.db"

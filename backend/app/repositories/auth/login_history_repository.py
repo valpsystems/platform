@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from datetime import UTC
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,9 +28,9 @@ class LoginHistoryRepository(BaseRepository[LoginHistory]):
     async def get_recent_failures(
         self, user_id: str, minutes: int = 15
     ) -> Sequence[LoginHistory]:
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
-        cutoff = datetime.now(timezone.utc) - timedelta(minutes=minutes)
+        cutoff = datetime.now(UTC) - timedelta(minutes=minutes)
         result = await self.session.execute(
             select(LoginHistory)
             .where(
