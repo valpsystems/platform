@@ -1,0 +1,54 @@
+name: 02 backend practice
+on:
+    push:
+        branches: [main]
+        paths:
+            - "backend/**"
+    pull_request:
+        branches: [main]
+        paths:
+            - "backend/**"
+    workflow_dispatch:
+concurrency:
+    group: backend-${{github.ref}}
+    cancel-in-progress: true
+
+env:
+    PYTHON_VERSION: 3.13
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: checkout branch
+              uses: actions/checkout@v4
+
+            - name: install python
+              uses: actions/setup-python@v5
+              with:
+                python-version: ${{env.PYTHON_VERSION}}
+
+            # cache login implimentation
+            - name: cache the pip in the cache
+              uses: actions/cache@v4
+              with:
+                path: ~/.cache/pip
+                key: ${{runner.os}}-pip-${{'hashFiles(backend/requirements.txt)'}}
+                restore-keys: |
+                  ${{runner.os}}-pip
+
+            - name: install dependecies
+              run: |
+                python -m pip install --upgrade pip
+                pip install -r backend/requirements.txt
+
+            - name: run ruff linter
+              working-directory: backend
+              run: ruff check .
+
+            - name: check black in python
+              working-directory: backend
+              run: black --check .
+
+
