@@ -54,6 +54,27 @@ jobs:
             - name: this will run on only the pull_request
               if: github.event_name == 'pull_request'
               run: echo "this will run only the pull request"
+
+    matrix_check:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                python-version: ["3.11", "3.12", "3.14"]
+
+            fail-fast: false
+
+        steps:
+            - name: code checkout
+              uses: actions/checkout@v4
+
+            - name: setup python ${{matrix.python-version}}
+              uses: actions/setup-python@v5
+              with:
+                python-version: ${{matrix.python-version}}
+
+            - name: check the version of python
+              run: python --version 
         
 
 
