@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.controllers import QuoteController
@@ -20,6 +21,6 @@ router = APIRouter(
 async def request_quote(
     quote_request: QuoteRequest,
     session: AsyncSession = Depends(get_db),
-) -> QuoteResponse:
+) -> JSONResponse:
     controller = QuoteController(session)
     return await controller.request(quote_request)

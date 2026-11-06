@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from app.constants.enums import QuoteStatus
 from app.emails import EmailService
 from app.repositories.quote_request import QuoteRequestRepository
@@ -12,7 +14,7 @@ class QuoteService:
         self.repository = repository
         self.email_service = EmailService()
 
-    async def process_quote(self, request: QuoteRequest) -> dict:
+    async def process_quote(self, request: QuoteRequest) -> dict[str, Any]:
         app_logger.info(
             "Processing quote request",
             name=request.name,

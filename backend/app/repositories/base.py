@@ -8,6 +8,8 @@ from typing import Any
 from sqlalchemy import Select, UnaryExpression, asc, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database.base import Base
+
 
 class PaginatedResult[ModelType]:
     def __init__(
@@ -24,7 +26,7 @@ class PaginatedResult[ModelType]:
         self.pages = (total + page_size - 1) // page_size if page_size > 0 else 0
 
 
-class BaseRepository[ModelType]:
+class BaseRepository[ModelType: Base]:
     def __init__(self, model: type[ModelType], session: AsyncSession) -> None:
         self.model = model
         self.session = session
@@ -32,7 +34,7 @@ class BaseRepository[ModelType]:
     def _not_deleted(self) -> Any:
         return self.model.is_deleted.is_(False)
 
-    def _base_query(self) -> Select:
+    def _base_query(self) -> Select[Any]:
         return select(self.model).where(self._not_deleted())
 
     async def create(self, **kwargs: Any) -> ModelType:
@@ -202,12 +204,12 @@ class BaseRepository[ModelType]:
 
     def _apply_sorting(
         self,
-        stmt: Select,
+        stmt: Select[Any],
         sorts: list[tuple[str, str]] | None,
-    ) -> Select:
+    ) -> Select[Any]:
         if not sorts:
             return stmt.order_by(self.model.created_at.desc())
-        order_clauses: list[UnaryExpression] = []
+        order_clauses: list[UnaryExpression[Any]] = []
         for field, direction in sorts:
             if hasattr(self.model, field):
                 column = getattr(self.model, field)

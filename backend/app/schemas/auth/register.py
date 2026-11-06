@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from typing import Any
+
+from pydantic import BaseModel, EmailStr, Field, ValidationInfo, field_validator
 
 from app.core.config import settings
 
@@ -23,7 +25,7 @@ class RegisterRequest(BaseModel):
 
     @field_validator("confirm_password")
     @classmethod
-    def passwords_match(cls, v: str, info) -> str:
+    def passwords_match(cls, v: str, info: ValidationInfo) -> str:
         if "password" in info.data and v != info.data["password"]:
             raise ValueError("Passwords do not match")
         return v
@@ -44,5 +46,5 @@ class RegisterRequest(BaseModel):
 
 class RegisterResponse(BaseModel):
     message: str
-    user: dict
+    user: dict[str, Any]
     requires_email_verification: bool = True

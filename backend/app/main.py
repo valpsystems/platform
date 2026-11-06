@@ -69,7 +69,7 @@ app.include_router(v1_router)
 
 
 @app.get("/", tags=["Root"])
-async def root() -> dict:
+async def root() -> dict[str, str]:
     return {
         "name": settings.APP_NAME,
         "version": settings.APP_VERSION,

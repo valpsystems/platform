@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -16,7 +17,7 @@ class FeedbackRequest(BaseModel):
 class FeedbackResponse(BaseModel):
     success: bool = True
     message: str = "Feedback received successfully"
-    data: dict | None = None
+    data: dict[str, Any] | None = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 

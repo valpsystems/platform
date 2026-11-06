@@ -3,13 +3,14 @@ from __future__ import annotations
 import hashlib
 import secrets
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from fastapi import HTTPException, status
 
 from app.core.config import settings
 from app.core.security import JWTService, hash_password, verify_password
 from app.emails import EmailService
-from app.models.auth import User
+from app.models.auth import EmailVerification, User
 from app.repositories.auth import (
     AuditLogRepository,
     LoginHistoryRepository,
@@ -52,7 +53,7 @@ class AuthService:
         request: RegisterRequest,
         ip_address: str | None = None,
         user_agent: str | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         existing_email = await self.user_repo.email_exists(request.email)
         if existing_email:
             raise HTTPException(
@@ -107,7 +108,12 @@ class AuthService:
             "requires_email_verification": True,
         }
 
-    async def login(self, request: LoginRequest, ip_address: str | None = None, user_agent: str | None = None) -> dict:
+    async def login(
+        self,
+        request: LoginRequest,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+    ) -> dict[str, Any]:
         user = await self.user_repo.get_by_email(request.email)
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
@@ -203,7 +209,7 @@ class AuthService:
             "user": user_data,
         }
 
-    async def logout(self, user_id: str, refresh_token: str | None = None) -> dict:
+    async def logout(self, user_id: str, refresh_token: str | None = None) -> dict[str, Any]:
         if refresh_token:
             token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
             stored_token = await self.refresh_token_repo.get_by_token_hash(token_hash)
@@ -221,7 +227,7 @@ class AuthService:
 
     async def refresh_token(
         self, refresh_token: str, ip_address: str | None = None, user_agent: str | None = None
-    ) -> dict:
+    ) -> dict[str, Any]:
         payload = JWTService.decode_token(refresh_token)
         if not payload or payload.get("type") != "refresh":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
@@ -283,7 +289,7 @@ class AuthService:
             "user": user.dict(),
         }
 
-    async def get_profile(self, user_id: str) -> dict:
+    async def get_profile(self, user_id: str) -> dict[str, Any]:
         user = await self.user_repo.get_with_roles(user_id)
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -293,7 +299,7 @@ class AuthService:
         profile["permissions"] = list(set(perm.codename for role in user.roles for perm in role.permissions))
         return profile
 
-    async def update_profile(self, user_id: str, request: UpdateProfileRequest) -> dict:
+    async def update_profile(self, user_id: str, request: UpdateProfileRequest) -> dict[str, Any]:
         user = await self.user_repo.get(user_id)
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -316,7 +322,7 @@ class AuthService:
 
         return user.dict()
 
-    async def change_password(self, user_id: str, request: ChangePasswordRequest) -> dict:
+    async def change_password(self, user_id: str, request: ChangePasswordRequest) -> dict[str, Any]:
         user = await self.user_repo.get(user_id)
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -353,7 +359,7 @@ class AuthService:
 
     async def forgot_password(
         self, request: ForgotPasswordRequest, ip_address: str | None = None, user_agent: str | None = None
-    ) -> dict:
+    ) -> dict[str, Any]:
         user = await self.user_repo.get_by_email(request.email)
 
         if not user:
@@ -400,7 +406,7 @@ class AuthService:
 
     async def reset_password(
         self, request: ResetPasswordRequest, ip_address: str | None = None, user_agent: str | None = None
-    ) -> dict:
+    ) -> dict[str, Any]:
         from sqlalchemy import select
 
         from app.models.auth import PasswordReset as PasswordResetModel
@@ -450,7 +456,7 @@ class AuthService:
 
         return {"message": "Password has been reset successfully"}
 
-    async def verify_email(self, token: str) -> dict:
+    async def verify_email(self, token: str) -> dict[str, Any]:
         from sqlalchemy import select
 
         from app.models.auth import EmailVerification as EmailVerificationModel
@@ -485,7 +491,7 @@ class AuthService:
 
         return {"message": "Email verified successfully"}
 
-    async def resend_verification(self, email: str) -> dict:
+    async def resend_verification(self, email: str) -> dict[str, Any]:
         user = await self.user_repo.get_by_email(email)
         if not user:
             return {"message": "If the email exists, a verification link has been sent"}
@@ -504,16 +510,12 @@ class AuthService:
 
         return {"message": "If the email exists, a verification link has been sent"}
 
-    async def _create_email_verification(self, user: User):
-        from app.models.auth import EmailVerification as EmailVerificationModel
-
+    async def _create_email_verification(self, user: User) -> EmailVerification:
         token = secrets.token_urlsafe(48)
         token_hash = hashlib.sha256(token.encode()).hexdigest()
         expires_at = datetime.now(UTC) + timedelta(hours=settings.EMAIL_VERIFICATION_TOKEN_EXPIRE_HOURS)
 
-        verification = EmailVerificationModel(
-            user_id=user.id, email=user.email, token=token_hash, expires_at=expires_at
-        )
+        verification = EmailVerification(user_id=user.id, email=user.email, token=token_hash, expires_at=expires_at)
         self.user_repo.session.add(verification)
         await self.user_repo.session.flush()
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -27,7 +27,7 @@ async def get_token_from_header(
 async def get_current_user(
     token: Annotated[str | None, Depends(get_token_from_header)],
     session: Annotated[AsyncSession, Depends(get_db)],
-) -> dict:
+) -> dict[str, Any]:
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -79,8 +79,8 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: Annotated[dict, Depends(get_current_user)],
-) -> dict:
+    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
+) -> dict[str, Any]:
     if not current_user.get("is_active"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -95,8 +95,8 @@ class PermissionChecker:
 
     async def __call__(
         self,
-        current_user: Annotated[dict, Depends(get_current_active_user)],
-    ) -> dict:
+        current_user: Annotated[dict[str, Any], Depends(get_current_active_user)],
+    ) -> dict[str, Any]:
         if current_user.get("is_superuser"):
             return current_user
 
@@ -116,8 +116,8 @@ class RoleChecker:
 
     async def __call__(
         self,
-        current_user: Annotated[dict, Depends(get_current_active_user)],
-    ) -> dict:
+        current_user: Annotated[dict[str, Any], Depends(get_current_active_user)],
+    ) -> dict[str, Any]:
         if current_user.get("is_superuser"):
             return current_user
 
@@ -140,8 +140,8 @@ def require_roles(*roles: str) -> RoleChecker:
 
 
 async def require_superuser(
-    current_user: Annotated[dict, Depends(get_current_active_user)],
-) -> dict:
+    current_user: Annotated[dict[str, Any], Depends(get_current_active_user)],
+) -> dict[str, Any]:
     if not current_user.get("is_superuser"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

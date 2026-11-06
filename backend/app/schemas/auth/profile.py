@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -22,7 +24,7 @@ class UserResponse(BaseModel):
     password_changed_at: str | None
     require_password_change: bool
     two_factor_enabled: bool
-    roles: list[dict] = Field(default_factory=list)
+    roles: list[dict[str, Any]] = Field(default_factory=list)
     created_at: str | None
     updated_at: str | None
 

@@ -2433,3 +2433,229 @@ Configure these in **Settings > Secrets and variables > Actions**:
 > **Remember:** CI/CD is a journey, not a destination. Start simple, iterate,
 > and add complexity as you need it. The best pipeline is the one your team
 > actually uses.
+
+---
+
+## Interview Guide — Questions & Answers
+
+Simple Q&A to practise before an interview. Cover everything from this guide.
+
+### 1. What is CI/CD?
+
+**A.** CI (Continuous Integration): code is merged often and automatically
+linted, tested and type-checked on every push/PR. CD (Continuous Delivery +
+Deployment): every change that passes CI is automatically deployed, either to
+production or to a staging environment that a reviewer can approve.
+
+Sample (from this repo, `02-backend-ci.yml`):
+
+```yaml
+name: Backend CI
+on:
+  push:
+    paths: ["backend/**"]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ruff check .
+      - run: black --check .
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: mypy app/
+```
+
+### 2. What are the main parts of a GitHub Actions workflow?
+
+**A.** `name`, `on:` (the trigger), `jobs:` (parallel units of work), and inside
+a job: `runs-on` (runner), `steps`, `uses` (reusable action) and `run` (shell
+command). A `.yml` file lives in `.github/workflows/`.
+
+Sample:
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Hello ${{ github.actor }}"
+```
+
+### 3. Difference between `job` and `step`?
+
+**A.** Jobs are the unit of parallelism — they run at the same time on
+different runners. Steps run one after another inside a job. Jobs are chained
+with `needs:`.
+
+```yaml
+jobs:
+  lint:  { runs-on: ubuntu-latest, steps: [ { run: "ruff check ." } ] }
+  test:
+    needs: lint              # waits for lint to finish
+    runs-on: ubuntu-latest
+```
+
+### 4. How do you trigger a workflow?
+
+**A.** With `on:`. Common events: `push`, `pull_request`, `schedule` (cron),
+`workflow_dispatch` (manual button), plus filters like `branches` and `paths`.
+
+```yaml
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [staging, production]
+  schedule:
+    - cron: "0 3 * * *"
+```
+
+### 5. What is `${{ }}` used for?
+
+**A.** Expressions evaluated at runtime. Common contexts: `github` (ref, event,
+actor), `secrets` (masked), `env`, `inputs`, `needs`, `steps`, `vars`.
+
+```yaml
+if: github.ref == 'refs/heads/main'       # run only on main
+uses: appleboy/ssh-action@v1
+with:
+  host: ${{ secrets.APP_SERVER_HOST }}
+```
+
+### 6. How do jobs pass data to each other?
+
+**A.** Via job `outputs` written to `$GITHUB_OUTPUT`, declared at job level,
+read in a job that `needs` it.
+
+```yaml
+jobs:
+  check:
+    outputs:
+      status: ${{ steps.test.outputs.status }}
+    steps:
+      - id: test
+        run: echo "status=success" >> "$GITHUB_OUTPUT"
+  deploy:
+    needs: check
+    steps:
+      - run: echo "Test result: ${{ needs.check.outputs.status }}"
+```
+
+### 7. What are `if:` conditions and status check functions?
+
+**A.** `if:` runs a step/job conditionally. Status functions: `success()`
+(default), `failure()`, `always()`, `cancelled()`.
+
+```yaml
+- name: Notify on failure
+  if: failure()
+  run: echo "slack alert"
+```
+
+### 8. What is a build matrix?
+
+**A.** One job expanded into many combinations (e.g. test on several Python
+versions) via `strategy.matrix`.
+
+```yaml
+strategy:
+  matrix:
+    python-version: ["3.11", "3.12", "3.13"]
+  fail-fast: false
+```
+
+### 9. What does `concurrency` do?
+
+**A.** Prevents overlapping runs for the same group — cancel or queue the
+previous run when a new one starts. `true` for CI, `false` for deploys.
+
+```yaml
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+```
+
+### 10. How does caching work?
+
+**A.** `actions/cache@v4` stores a directory keyed by file content so
+dependencies are restored, not reinstalled.
+
+```yaml
+- uses: actions/cache@v4
+  with:
+    path: ~/.cache/pip
+    key: pip-${{ hashFiles('backend/requirements.txt') }}
+```
+
+### 11. How do you share build outputs between runs?
+
+**A.** With artifacts: `actions/upload-artifact` / `actions/download-artifact`.
+
+### 12. Composite action vs reusable workflow?
+
+**A.** A composite action (`uses: ./.github/actions/setup-python-env`) runs
+steps inside your current job. A reusable workflow (triggered with
+`on: workflow_call`) runs as its own separate jobs and runners, and is called
+via `uses: owner/repo/.github/workflows/other.yml@main`.
+
+### 13. What are GitHub Environments and protection rules?
+
+**A.** Named deployment targets (`staging`, `production`) that track history and
+can enforce rules — required reviewers, wait timers, branch restrictions. A
+deploy job targeting a protected environment pauses until the rules pass.
+
+```yaml
+deploy-production:
+  runs-on: ubuntu-latest
+  environment:
+    name: production
+    url: https://valpsystems.com
+```
+
+### 14. Static credentials vs OIDC?
+
+**A.** Static credentials (IAM keys) are stored as secrets and can leak; OIDC
+exchanges a short-lived token with AWS (`id-token: write` permission), so no
+long-lived credentials exist. Prefer OIDC for production.
+
+### 15. When use self-hosted runners? Security rule?
+
+**A.** For cost, custom packages, or secrets/artifacts that must stay inside
+your VPC. Golden rule: a self-hosted runner executes code on YOUR machine with
+access to your secrets — only run trusted code on it (use GitHub-hosted for
+fork PRs).
+
+```yaml
+deploy-prod:
+  runs-on: [self-hosted, valp]
+  if: github.ref == 'refs/heads/main'
+```
+
+### 16. How do you run a database in CI?
+
+**A.** Service containers (Docker) on the job runner, e.g. PostgreSQL for
+backend integration tests.
+
+```yaml
+services:
+  postgres:
+    image: postgres:15
+    env:
+      POSTGRES_DB: test_db
+    ports: ["5432:5432"]
+```
+
+### 17. How do you debug a failing workflow?
+
+**A.** `actionlint`/`yamllint` for syntax, `act` to run locally, `gh run rerun`,
+and re-read the failing step's log; install `ACTIONS_STEP_DEBUG=true` for
+verbose output. Reproduce locally, then fix config/command, then re-push.

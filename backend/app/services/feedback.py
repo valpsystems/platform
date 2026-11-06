@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from app.constants.enums import FeedbackCategory
 from app.emails import EmailService
 from app.repositories.feedback import FeedbackRepository
@@ -12,7 +14,7 @@ class FeedbackService:
         self.repository = repository
         self.email_service = EmailService()
 
-    async def process_feedback(self, request: FeedbackRequest) -> dict:
+    async def process_feedback(self, request: FeedbackRequest) -> dict[str, Any]:
         app_logger.info(
             "Processing feedback",
             rating=request.rating,

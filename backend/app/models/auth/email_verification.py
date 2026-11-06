@@ -18,6 +18,8 @@ class EmailVerification(Base):
     is_used: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    token_plain: str | None = None
+
     @property
     def is_expired(self) -> bool:
         expires = self.expires_at

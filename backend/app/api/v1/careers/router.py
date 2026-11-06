@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.controllers import CareerController
@@ -20,6 +21,6 @@ router = APIRouter(
 async def apply_career(
     request: CareerRequest,
     session: AsyncSession = Depends(get_db),
-) -> CareerResponse:
+) -> JSONResponse:
     controller = CareerController(session)
     return await controller.apply(request)
