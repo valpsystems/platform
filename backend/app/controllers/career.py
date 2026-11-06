@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.career_application import CareerApplicationRepository
@@ -12,6 +13,6 @@ class CareerController:
     def __init__(self, session: AsyncSession) -> None:
         self.service = CareerService(CareerApplicationRepository(session))
 
-    async def apply(self, request: CareerRequest) -> APIResponse:
+    async def apply(self, request: CareerRequest) -> JSONResponse:
         data = await self.service.process_application(request)
         return APIResponse.created(data=data, message="Application received successfully")

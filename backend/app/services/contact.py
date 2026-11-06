@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from app.constants.enums import ContactStatus
 from app.emails import EmailService
 from app.repositories.contact import ContactRepository
@@ -12,7 +14,7 @@ class ContactService:
         self.repository = repository
         self.email_service = EmailService()
 
-    async def process_contact(self, request: ContactRequest) -> dict:
+    async def process_contact(self, request: ContactRequest) -> dict[str, Any]:
         app_logger.info(
             "Processing contact request",
             name=request.name,

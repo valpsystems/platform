@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -16,5 +17,5 @@ class ValidationErrorResponse(BaseModel):
     success: bool = False
     message: str = "Validation failed"
     errorCode: str = "VALIDATION_ERROR"
-    errors: list[dict] = Field(default_factory=list)
+    errors: list[dict[str, Any]] = Field(default_factory=list)
     timestamp: datetime = Field(default_factory=datetime.utcnow)

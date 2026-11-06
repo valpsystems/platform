@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.quote_request import QuoteRequestRepository
@@ -12,6 +13,6 @@ class QuoteController:
     def __init__(self, session: AsyncSession) -> None:
         self.service = QuoteService(QuoteRequestRepository(session))
 
-    async def request(self, quote_request: QuoteRequest) -> APIResponse:
+    async def request(self, quote_request: QuoteRequest) -> JSONResponse:
         data = await self.service.process_quote(quote_request)
         return APIResponse.created(data=data, message="Quote request received successfully")

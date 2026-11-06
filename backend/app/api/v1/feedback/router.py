@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.controllers import FeedbackController
@@ -20,6 +21,6 @@ router = APIRouter(
 async def submit_feedback(
     request: FeedbackRequest,
     session: AsyncSession = Depends(get_db),
-) -> FeedbackResponse:
+) -> JSONResponse:
     controller = FeedbackController(session)
     return await controller.submit(request)

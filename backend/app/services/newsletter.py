@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 
 from app.constants.enums import SubscriptionStatus
 from app.emails import EmailService
@@ -14,7 +15,7 @@ class NewsletterService:
         self.repository = repository
         self.email_service = EmailService()
 
-    async def subscribe(self, request: NewsletterRequest) -> dict:
+    async def subscribe(self, request: NewsletterRequest) -> dict[str, Any]:
         app_logger.info("Processing newsletter subscription", email=request.email, name=request.name)
 
         existing = await self.repository.first(email=request.email)

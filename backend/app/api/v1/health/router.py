@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 
 from app.controllers import HealthController
 from app.schemas.health import HealthResponse
@@ -17,5 +18,5 @@ controller = HealthController()
     summary="Health Check",
     description="Returns the health status of the application.",
 )
-async def health_check() -> HealthResponse:
+async def health_check() -> JSONResponse:
     return await controller.check()

@@ -1,4 +1,7 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_active_user, get_current_user
@@ -30,7 +33,7 @@ async def register(
     request: Request,
     body: RegisterRequest,
     session: AsyncSession = Depends(get_db),
-):
+) -> JSONResponse:
     controller = AuthController(session)
     return await controller.register(request, body)
 
@@ -44,7 +47,7 @@ async def login(
     request: Request,
     body: LoginRequest,
     session: AsyncSession = Depends(get_db),
-):
+) -> JSONResponse:
     controller = AuthController(session)
     return await controller.login(request, body)
 
@@ -56,8 +59,8 @@ async def login(
 )
 async def logout(
     session: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
-):
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> JSONResponse:
     controller = AuthController(session)
     return await controller.logout(current_user)
 
@@ -71,7 +74,7 @@ async def refresh_token(
     request: Request,
     body: TokenRefreshRequest,
     session: AsyncSession = Depends(get_db),
-):
+) -> JSONResponse:
     controller = AuthController(session)
     return await controller.refresh_token(request, body.refresh_token)
 
@@ -83,8 +86,8 @@ async def refresh_token(
 )
 async def get_profile(
     session: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_active_user),
-):
+    current_user: dict[str, Any] = Depends(get_current_active_user),
+) -> JSONResponse:
     controller = AuthController(session)
     return await controller.get_profile(current_user)
 
@@ -97,8 +100,8 @@ async def get_profile(
 async def update_profile(
     body: UpdateProfileRequest,
     session: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_active_user),
-):
+    current_user: dict[str, Any] = Depends(get_current_active_user),
+) -> JSONResponse:
     controller = AuthController(session)
     return await controller.update_profile(current_user, body)
 
@@ -111,8 +114,8 @@ async def update_profile(
 async def change_password(
     body: ChangePasswordRequest,
     session: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_active_user),
-):
+    current_user: dict[str, Any] = Depends(get_current_active_user),
+) -> JSONResponse:
     controller = AuthController(session)
     return await controller.change_password(current_user, body)
 
@@ -126,7 +129,7 @@ async def forgot_password(
     request: Request,
     body: ForgotPasswordRequest,
     session: AsyncSession = Depends(get_db),
-):
+) -> JSONResponse:
     controller = AuthController(session)
     return await controller.forgot_password(request, body)
 
@@ -140,7 +143,7 @@ async def reset_password(
     request: Request,
     body: ResetPasswordRequest,
     session: AsyncSession = Depends(get_db),
-):
+) -> JSONResponse:
     controller = AuthController(session)
     return await controller.reset_password(request, body)
 
@@ -153,7 +156,7 @@ async def reset_password(
 async def verify_email(
     body: VerifyEmailRequest,
     session: AsyncSession = Depends(get_db),
-):
+) -> JSONResponse:
     controller = AuthController(session)
     return await controller.verify_email(body)
 
@@ -166,6 +169,6 @@ async def verify_email(
 async def resend_verification(
     body: ResendVerificationRequest,
     session: AsyncSession = Depends(get_db),
-):
+) -> JSONResponse:
     controller = AuthController(session)
     return await controller.resend_verification(body)

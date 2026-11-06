@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -14,7 +16,7 @@ class LoginResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     expires_in: int
-    user: dict
+    user: dict[str, Any]
 
 
 class TokenRefreshRequest(BaseModel):

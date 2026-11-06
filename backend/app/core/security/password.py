@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from typing import cast
 
 from passlib.context import CryptContext
 
@@ -14,11 +15,11 @@ pwd_context = CryptContext(
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return cast(str, pwd_context.hash(password))
 
 
 def verify_password(password: str, hashed: str) -> bool:
-    return pwd_context.verify(password, hashed)
+    return cast(bool, pwd_context.verify(password, hashed))
 
 
 def is_password_strong(password: str) -> tuple[bool, list[str]]:

@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 class HealthResponse(BaseModel):
     success: bool = True
     message: str = "Service is healthy"
-    data: dict = Field(
+    data: dict[str, str] = Field(
         default_factory=lambda: {
             "status": "healthy",
             "version": "1.0.0",

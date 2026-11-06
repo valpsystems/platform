@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.controllers import NewsletterController
@@ -20,6 +21,6 @@ router = APIRouter(
 async def subscribe_newsletter(
     request: NewsletterRequest,
     session: AsyncSession = Depends(get_db),
-) -> NewsletterResponse:
+) -> JSONResponse:
     controller = NewsletterController(session)
     return await controller.subscribe(request)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import secrets
 from datetime import UTC, datetime, timedelta
+from typing import Any, cast
 
 from jose import JWTError, jwt
 
@@ -15,7 +16,7 @@ class JWTService:
 
     @staticmethod
     def create_access_token(
-        user_id: str, email: str, extra_claims: dict | None = None, expires_delta: timedelta | None = None
+        user_id: str, email: str, extra_claims: dict[str, Any] | None = None, expires_delta: timedelta | None = None
     ) -> str:
         expires_in = expires_delta or timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
         now = datetime.now(UTC)
@@ -29,7 +30,7 @@ class JWTService:
         }
         if extra_claims:
             payload.update(extra_claims)
-        return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+        return cast(str, jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM))
 
     @staticmethod
     def create_refresh_token(user_id: str, email: str, expires_delta: timedelta | None = None) -> str:
@@ -43,12 +44,15 @@ class JWTService:
             "iat": now,
             "exp": now + expires_in,
         }
-        return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+        return cast(str, jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM))
 
     @staticmethod
-    def decode_token(token: str) -> dict | None:
+    def decode_token(token: str) -> dict[str, Any] | None:
         try:
-            payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+            payload = cast(
+                dict[str, Any],
+                jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]),
+            )
             return payload
         except JWTError:
             return None
@@ -58,7 +62,7 @@ class JWTService:
         payload = JWTService.decode_token(token)
         if payload is None or "exp" not in payload:
             return 0
-        return payload["exp"]
+        return int(payload["exp"])
 
     @staticmethod
     def is_token_expired(token: str) -> bool:

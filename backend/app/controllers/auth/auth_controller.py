@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -63,7 +65,7 @@ class AuthController:
 
     async def logout(
         self,
-        current_user: dict,
+        current_user: dict[str, Any],
         refresh_token: str | None = None,
     ) -> JSONResponse:
         result = await self.service.logout(
@@ -86,14 +88,14 @@ class AuthController:
 
     async def get_profile(
         self,
-        current_user: dict,
+        current_user: dict[str, Any],
     ) -> JSONResponse:
         profile = await self.service.get_profile(user_id=current_user["id"])
         return APIResponse.success(data=profile, message="Profile retrieved")
 
     async def update_profile(
         self,
-        current_user: dict,
+        current_user: dict[str, Any],
         body: UpdateProfileRequest,
     ) -> JSONResponse:
         result = await self.service.update_profile(
@@ -104,7 +106,7 @@ class AuthController:
 
     async def change_password(
         self,
-        current_user: dict,
+        current_user: dict[str, Any],
         body: ChangePasswordRequest,
     ) -> JSONResponse:
         result = await self.service.change_password(

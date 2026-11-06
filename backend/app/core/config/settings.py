@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from typing import cast
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -89,20 +90,20 @@ class Settings(BaseSettings):
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
-    def parse_cors_origins(cls, v: str | list) -> list:
+    def parse_cors_origins(cls, v: str | list[str]) -> list[str]:
         if isinstance(v, list):
             return v
         if isinstance(v, str):
-            return json.loads(v)
+            return cast(list[str], json.loads(v))
         return ["http://localhost:3000"]
 
     @field_validator("TRUSTED_HOSTS", mode="before")
     @classmethod
-    def parse_trusted_hosts(cls, v: str | list) -> list:
+    def parse_trusted_hosts(cls, v: str | list[str]) -> list[str]:
         if isinstance(v, list):
             return v
         if isinstance(v, str):
-            return json.loads(v)
+            return cast(list[str], json.loads(v))
         return ["localhost"]
 
     @property
@@ -147,7 +148,7 @@ settings = Settings()
 
 if os.getenv("APP_ENV") == "testing":
     settings = Settings(
-        _env_file=None,
+        _env_file=None,  # type: ignore[call-arg]
         APP_ENV="testing",
         APP_DEBUG=False,
         DATABASE_ECHO=False,

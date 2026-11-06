@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from app.constants.enums import ApplicationStatus
 from app.emails import EmailService
 from app.repositories.career_application import CareerApplicationRepository
@@ -12,7 +14,7 @@ class CareerService:
         self.repository = repository
         self.email_service = EmailService()
 
-    async def process_application(self, request: CareerRequest) -> dict:
+    async def process_application(self, request: CareerRequest) -> dict[str, Any]:
         app_logger.info(
             "Processing career application",
             name=request.name,

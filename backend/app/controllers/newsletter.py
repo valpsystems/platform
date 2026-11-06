@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.newsletter import NewsletterRepository
@@ -12,6 +13,6 @@ class NewsletterController:
     def __init__(self, session: AsyncSession) -> None:
         self.service = NewsletterService(NewsletterRepository(session))
 
-    async def subscribe(self, request: NewsletterRequest) -> APIResponse:
+    async def subscribe(self, request: NewsletterRequest) -> JSONResponse:
         data = await self.service.subscribe(request)
         return APIResponse.created(data=data, message="Subscription successful")

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.contact import ContactRepository
@@ -12,6 +13,6 @@ class ContactController:
     def __init__(self, session: AsyncSession) -> None:
         self.service = ContactService(ContactRepository(session))
 
-    async def submit(self, request: ContactRequest) -> APIResponse:
+    async def submit(self, request: ContactRequest) -> JSONResponse:
         data = await self.service.process_contact(request)
         return APIResponse.created(data=data, message="Contact request received successfully")
